@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RelayGuard — Never lose a webhook again</title>
+  <!-- Google Fonts: Inter & Monospace -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Official Lucide Icons Library with fallback -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script>if (!window.lucide) { document.write('<script src="https://unpkg.com/lucide@latest"><\/script>'); }</script>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="landing.css" />
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="landing-navbar">
+    <a href="landing.html" class="brand-link" title="RelayGuard Home">
+      <div class="brand-icon-box">
+        <i data-lucide="shield" class="icon-sidebar"></i>
+      </div>
+      <span class="brand-title">RelayGuard</span>
+    </a>
+
+    <nav class="nav-links">
+      <a href="#product" class="nav-item-link">Product</a>
+      <a href="#features" class="nav-item-link">Features</a>
+      <a href="#how-it-works" class="nav-item-link">How it works</a>
+      <a href="#integration" class="nav-item-link">API & SDK</a>
+      <a href="#faq" class="nav-item-link">FAQ</a>
+    </nav>
+
+    <div class="nav-actions">
+      <a href="login.html" class="btn btn-link">Sign in</a>
+      <a href="register.html" class="btn btn-primary">Get started free</a>
+    </div>
+  </header>
+
+  <main>
+    <!-- ============================================== -->
+    <!-- HERO SECTION WITH LIVE DASHBOARD PREVIEW       -->
+    <!-- ============================================== -->
+    <section class="hero-section container" id="product">
+      <div class="hero-layout">
+        <!-- Left Hero Copy -->
+        <div class="hero-left">
+          <div class="badge-tag">
+            <i data-lucide="shield-check" class="icon-control"></i>
+            <span>Reliable webhooks for modern applications</span>
+          </div>
+
+          <h1 class="hero-headline">
+            Never lose a<br />
+            <span class="highlight-blue">webhook again.</span>
+          </h1>
+
+          <p class="hero-description">
+            Track deliveries, diagnose failures, and recover from webhook issues without the guesswork. Complete visibility and automated recovery for engineering teams.
+          </p>
+
+          <div class="hero-cta-group">
+            <a href="register.html" class="btn btn-primary btn-lg">
+              <span>Get started free</span>
+              <i data-lucide="arrow-right" class="icon-control"></i>
+            </a>
+            <a href="index.html" class="btn btn-secondary btn-lg">
+              <i data-lucide="layout-dashboard" class="icon-control"></i>
+              <span>View live workspace</span>
+            </a>
+          </div>
+
+          <div class="hero-trust-bullets">
+            <div class="bullet-item">
+              <span class="bullet-check">✓</span>
+              <span>Reliable delivery</span>
+            </div>
+            <div class="bullet-item">
+              <span class="bullet-check">✓</span>
+              <span>Automatic retries</span>
+            </div>
+            <div class="bullet-item">
+              <span class="bullet-check">✓</span>
+              <span>AI-assisted failure diagnosis</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Hero: Real Product Preview Window -->
+        <div class="hero-right">
+          <div class="hero-preview-window">
+            <div class="window-titlebar">
+              <div class="window-dots">
+                <span class="w-dot red"></span>
+                <span class="w-dot yellow"></span>
+                <span class="w-dot green"></span>
+              </div>
+              <div class="window-url">app.relayguard.dev/overview</div>
+              <a href="index.html" class="btn btn-secondary btn-sm" style="font-size: 11px;">
+                <span>Open app</span>
+                <i data-lucide="external-link" class="icon-control"></i>
+              </a>
+            </div>
+
+            <!-- Mini Dashboard Surface Inside Hero -->
+            <div style="padding: 20px; background: #FAFCFF;">
+              <!-- 4 KPI Metrics -->
+              <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px;">
+                <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px;">
+                  <span style="font-size: 11px; color: var(--text-secondary); display: block;">Total deliveries</span>
+                  <div style="font-size: 18px; font-weight: 600; color: var(--text-main);" class="num-tabular">12,480</div>
+                  <span style="font-size: 11px; color: var(--primary-blue); font-weight: 600;">↑ 12%</span>
+                </div>
+                <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px;">
+                  <span style="font-size: 11px; color: var(--text-secondary); display: block;">Successful</span>
+                  <div style="font-size: 18px; font-weight: 600; color: var(--success);" class="num-tabular">11,902</div>
+                  <span style="font-size: 11px; color: var(--success); font-weight: 600;">95.4%</span>
+                </div>
+                <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px;">
+                  <span style="font-size: 11px; color: var(--text-secondary); display: block;">Failed</span>
+                  <div style="font-size: 18px; font-weight: 600; color: var(--danger);" class="num-tabular">312</div>
+                  <span style="font-size: 11px; color: var(--danger); font-weight: 600;">2.5%</span>
+                </div>
+                <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px;">
+                  <span style="font-size: 11px; color: var(--text-secondary); display: block;">Retrying</span>
+                  <div style="font-size: 18px; font-weight: 600; color: var(--warning);" class="num-tabular">48</div>
+                  <span style="font-size: 11px; color: var(--warning); font-weight: 600;">0.4%</span>
+                </div>
+              </div>
+
+              <!-- Diagnosis Card Preview -->
+              <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: 8px; padding: 14px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <i data-lucide="circle-alert" class="icon-control" style="color: var(--danger);"></i>
+                    <strong style="font-size: 13px;">evt_8f31a2c9 · HTTP 401 Unauthorized</strong>
+                  </div>
+                  <span class="badge-status-code" style="background: var(--primary-blue-subtle); color: var(--primary-blue);">AI-assisted</span>
+                </div>
+                <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.45; margin-bottom: 10px;">
+                  The destination endpoint rejected authorization headers. Ingestion secret configured for Payments service has expired.
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <span class="status-pill status-danger" style="font-size: 11px;">
+                    <i data-lucide="rotate-ccw" class="icon-control"></i>
+                    <span>Retry queued</span>
+                  </span>
+                  <span class="status-pill status-success" style="font-size: 11px;">
+                    <i data-lucide="shield-check" class="icon-control"></i>
+                    <span>Idempotent</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- PROBLEM & VALUE PROPOSITION                    -->
+    <!-- ============================================== -->
+    <section class="section-problem-value container">
+      <div class="section-head-center">
+        <h2 class="section-title">Why webhook reliability is hard</h2>
+        <p class="section-subtext">Webhooks are silent points of failure. When an endpoint drops a payload, recovery usually means digging through server logs and running manual database scripts.</p>
+      </div>
+
+      <div class="problem-solution-grid">
+        <!-- The Problem -->
+        <div class="ps-card problem">
+          <div class="ps-card-header" style="color: var(--danger);">
+            <i data-lucide="alert-triangle" class="icon-standard"></i>
+            <span>Without RelayGuard</span>
+          </div>
+          <div class="ps-item-list">
+            <div class="ps-item">
+              <span style="color: var(--danger); font-weight: 700;">✕</span>
+              <span>Failed deliveries go completely unnoticed until customers file support tickets.</span>
+            </div>
+            <div class="ps-item">
+              <span style="color: var(--danger); font-weight: 700;">✕</span>
+              <span>Generic HTTP 500 or timeout error codes don't explain why requests broke.</span>
+            </div>
+            <div class="ps-item">
+              <span style="color: var(--danger); font-weight: 700;">✕</span>
+              <span>Engineers spend hours manually re-triggering webhook events via database scripts.</span>
+            </div>
+            <div class="ps-item">
+              <span style="color: var(--danger); font-weight: 700;">✕</span>
+              <span>Uncertainty about which consumer microservices are degraded or unhealthy.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- The Solution -->
+        <div class="ps-card solution">
+          <div class="ps-card-header" style="color: var(--success);">
+            <i data-lucide="circle-check" class="icon-standard"></i>
+            <span>With RelayGuard</span>
+          </div>
+          <div class="ps-item-list">
+            <div class="ps-item">
+              <span style="color: var(--success); font-weight: 700;">✓</span>
+              <span>Real-time delivery tracking with a complete, searchable history of every attempt.</span>
+            </div>
+            <div class="ps-item">
+              <span style="color: var(--success); font-weight: 700;">✓</span>
+              <span>AI-assisted failure diagnosis separating observed facts from suggested hypotheses.</span>
+            </div>
+            <div class="ps-item">
+              <span style="color: var(--success); font-weight: 700;">✓</span>
+              <span>1-click manual retries and controlled replays with idempotency protection.</span>
+            </div>
+            <div class="ps-item">
+              <span style="color: var(--success); font-weight: 700;">✓</span>
+              <span>Proactive endpoint health monitoring and multi-channel incident broadcasts.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 6 CORE PLATFORM FEATURES                       -->
+    <!-- ============================================== -->
+    <section class="section-features container" id="features">
+      <div class="section-head-center">
+        <h2 class="section-title">Built for developer visibility & recovery</h2>
+        <p class="section-subtext">Everything your engineering team needs to monitor, troubleshoot, and fix webhook deliveries.</p>
+      </div>
+
+      <div class="feature-cards-grid">
+        <!-- 1 -->
+        <div class="feature-card">
+          <div class="f-icon-box">
+            <i data-lucide="inbox" class="icon-standard"></i>
+          </div>
+          <h3 class="f-title">Searchable delivery history</h3>
+          <p class="f-desc">Filter millions of webhook attempts by Event ID, destination host, HTTP status code, or JSON payload body.</p>
+        </div>
+
+        <!-- 2 -->
+        <div class="feature-card">
+          <div class="f-icon-box">
+            <i data-lucide="sparkles" class="icon-standard"></i>
+          </div>
+          <h3 class="f-title">Diagnose failures faster</h3>
+          <p class="f-desc">Automated failure classification and evidence-backed recovery recommendations. Observed facts are kept distinct from AI hypotheses.</p>
+        </div>
+
+        <!-- 3 -->
+        <div class="feature-card">
+          <div class="f-icon-box">
+            <i data-lucide="refresh-cw" class="icon-standard"></i>
+          </div>
+          <h3 class="f-title">Automatic exponential backoff</h3>
+          <p class="f-desc">Intelligent retry policies automatically resend events during transient network drops and downstream rate limits.</p>
+        </div>
+
+        <!-- 4 -->
+        <div class="feature-card">
+          <div class="f-icon-box">
+            <i data-lucide="rotate-ccw" class="icon-standard"></i>
+          </div>
+          <h3 class="f-title">Controlled replay workflows</h3>
+          <p class="f-desc">Safely replay events as new deliveries with comprehensive audit logs and duplicate side-effect warnings.</p>
+        </div>
+
+        <!-- 5 -->
+        <div class="feature-card">
+          <div class="f-icon-box">
+            <i data-lucide="webhook" class="icon-standard"></i>
+          </div>
+          <h3 class="f-title">Endpoint health monitoring</h3>
+          <p class="f-desc">Track SLA success rates, response latencies, and availability states (Healthy, Degraded, Down) across all your subscriber services.</p>
+        </div>
+
+        <!-- 6 -->
+        <div class="feature-card">
+          <div class="f-icon-box">
+            <i data-lucide="braces" class="icon-standard"></i>
+          </div>
+          <h3 class="f-title">Request & response inspector</h3>
+          <p class="f-desc">Inspect exact request headers, payload bodies, response codes, and attempt timelines with automatic secrets masking.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- HOW IT WORKS (3 SIMPLE STEPS)                  -->
+    <!-- ============================================== -->
+    <section class="section-steps container" id="how-it-works">
+      <div class="section-head-center">
+        <h2 class="section-title">How RelayGuard works</h2>
+        <p class="section-subtext">Get up and running in minutes with zero intrusive architecture changes.</p>
+      </div>
+
+      <div class="steps-grid">
+        <div class="step-box">
+          <div class="step-num-badge">1</div>
+          <h3 class="step-title">Configure your endpoint</h3>
+          <p class="step-text">Register your receiving webhook URL and configure optional HMAC signatures or Bearer tokens in your dashboard.</p>
+        </div>
+
+        <div class="step-box">
+          <div class="step-num-badge">2</div>
+          <h3 class="step-title">Monitor deliveries</h3>
+          <p class="step-text">RelayGuard logs every attempt, tracking HTTP response codes, latency metrics, and error patterns in real time.</p>
+        </div>
+
+        <div class="step-box">
+          <div class="step-num-badge">3</div>
+          <h3 class="step-title">Recover seamlessly</h3>
+          <p class="step-text">Automatic retries recover transient failures. Inspect diagnosis reports and trigger manual replays with one click.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- DEVELOPER INTEGRATION CODE SNIPPET             -->
+    <!-- ============================================== -->
+    <section class="section-integration container" id="integration">
+      <div class="integration-container">
+        <div>
+          <div class="badge-tag">
+            <i data-lucide="code" class="icon-control"></i>
+            <span>Developer API</span>
+          </div>
+          <h2 class="section-title">Integrate in minutes</h2>
+          <p class="section-subtext" style="margin-bottom: 20px;">
+            Send webhook deliveries through RelayGuard's HTTP proxy using your standard Bearer token credentials.
+          </p>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; color: var(--text-secondary); margin-bottom: 24px;">
+            <li style="display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="check" class="icon-control" style="color: var(--success);"></i>
+              <span>Idempotent event dispatching</span>
+            </li>
+            <li style="display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="check" class="icon-control" style="color: var(--success);"></i>
+              <span>SHA-256 payload integrity verification</span>
+            </li>
+            <li style="display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="check" class="icon-control" style="color: var(--success);"></i>
+              <span>Automated exponential backoff retries</span>
+            </li>
+          </ul>
+          <a href="register.html" class="btn btn-primary">
+            <span>Get your API key</span>
+            <i data-lucide="arrow-right" class="icon-control"></i>
+          </a>
+        </div>
+
+        <!-- Terminal Snippet -->
+        <div class="code-terminal-box">
+          <div class="code-titlebar">
+            <span style="font-size: 12px; font-family: var(--font-mono); color: #94A3B8;">POST /v1/deliveries</span>
+            <button class="btn btn-secondary btn-sm" onclick="copySnippet(this)" style="background: rgba(255,255,255,0.1); color: #FFF; border-color: rgba(255,255,255,0.2);">
+              <i data-lucide="copy" class="icon-control"></i>
+              <span>Copy</span>
+            </button>
+          </div>
+          <pre class="code-snippet-pre"><code id="codeSnippetText">curl -X POST https://api.relayguard.dev/v1/deliveries \
+  -H "Authorization: Bearer rg_live_948f29c488b19e248b9f1a" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "event": "invoice.paid",
+    "endpoint_id": "ep_live_01",
+    "payload": {
+      "customer_id": "cus_99182",
+      "amount_usd": 420.00,
+      "status": "settled"
+    }
+  }'</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- FAQ SECTION                                    -->
+    <!-- ============================================== -->
+    <section class="section-faq container" id="faq">
+      <div class="section-head-center">
+        <h2 class="section-title">Frequently asked questions</h2>
+        <p class="section-subtext">Common questions about RelayGuard's webhook reliability and recovery architecture.</p>
+      </div>
+
+      <div class="faq-grid">
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-q">
+            <span>How does RelayGuard track webhook attempts?</span>
+            <i data-lucide="chevron-down" class="icon-control"></i>
+          </div>
+          <div class="faq-a">
+            RelayGuard acts as an intelligent relay proxy. Every HTTP dispatch records the exact timestamp, response code, latency, and response headers for complete operational visibility.
+          </div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-q">
+            <span>What happens when an endpoint returns 5xx or times out?</span>
+            <i data-lucide="chevron-down" class="icon-control"></i>
+          </div>
+          <div class="faq-a">
+            Transient failures trigger our configurable exponential backoff algorithm with jitter to prevent thunderous herd problems on your receiving microservices.
+          </div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-q">
+            <span>How does failure diagnosis differentiate facts from hypotheses?</span>
+            <i data-lucide="chevron-down" class="icon-control"></i>
+          </div>
+          <div class="faq-a">
+            Observed facts (like HTTP 401 response codes and server latency) are displayed as verified telemetry. AI-assisted hypotheses are explicitly flagged as interpretations accompanied by a confidence rating.
+          </div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-q">
+            <span>Can I safely replay events without duplicate charges?</span>
+            <i data-lucide="chevron-down" class="icon-control"></i>
+          </div>
+          <div class="faq-a">
+            Yes. RelayGuard supports controlled replays with clear side-effect warnings and maintains original Event IDs to preserve idempotency safeguards in receiving systems.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- FINAL CTA BANNER                               -->
+    <!-- ============================================== -->
+    <section class="cta-banner-section">
+      <div class="container">
+        <h2 class="cta-title">Make webhook failures easier to understand and recover from.</h2>
+        <p class="cta-sub">Start monitoring your endpoints and automated retries in under 5 minutes.</p>
+        <div style="display: flex; justify-content: center; gap: 12px;">
+          <a href="register.html" class="btn btn-primary btn-lg">
+            <span>Get started free</span>
+            <i data-lucide="arrow-right" class="icon-control"></i>
+          </a>
+          <a href="index.html" class="btn btn-secondary btn-lg">
+            <i data-lucide="layout-dashboard" class="icon-control"></i>
+            <span>Explore live workspace</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============================================== -->
+  <!-- FOOTER                                         -->
+  <!-- ============================================== -->
+  <footer class="landing-footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand-side">
+          <a href="landing.html" class="brand-link" style="margin-bottom: 8px;">
+            <div class="brand-icon-box" style="width: 26px; height: 26px;">
+              <i data-lucide="shield" class="icon-control"></i>
+            </div>
+            <span class="brand-title">RelayGuard</span>
+          </a>
+          <p class="footer-tagline">Webhook reliability, failure diagnosis, and automated recovery for modern engineering teams.</p>
+        </div>
+
+        <div class="footer-columns-group">
+          <div class="f-col">
+            <span class="f-col-title">Product</span>
+            <a href="#features">Features</a>
+            <a href="#how-it-works">How it works</a>
+            <a href="#integration">Developer API</a>
+            <a href="index.html">Workspace</a>
+          </div>
+          <div class="f-col">
+            <span class="f-col-title">Account</span>
+            <a href="login.html">Sign in</a>
+            <a href="register.html">Get started</a>
+            <a href="forgot-password.html">Reset password</a>
+          </div>
+          <div class="f-col">
+            <span class="f-col-title">Resources</span>
+            <a href="#integration">cURL guide</a>
+            <a href="#faq">FAQ</a>
+            <a href="index.html">Live demo</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>© 2026 RelayGuard Inc. All rights reserved.</div>
+        <div class="footer-links">
+          <span>Reliable Webhook Delivery Architecture</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) window.lucide.createIcons();
+    });
+
+    function toggleFaq(card) {
+      const answer = card.querySelector('.faq-a');
+      const isVisible = answer.style.display === 'block';
+      answer.style.display = isVisible ? 'none' : 'block';
+      const icon = card.querySelector('.faq-q i');
+      if (icon) {
+        icon.style.transform = isVisible ? 'rotate(0deg)' : 'rotate(180deg)';
+        icon.style.transition = 'transform 180ms ease';
+      }
+    }
+
+    function copySnippet(btn) {
+      const text = document.getElementById('codeSnippetText').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = `<i data-lucide="check" class="icon-control"></i><span>Copied!</span>`;
+        if (window.lucide) window.lucide.createIcons();
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          if (window.lucide) window.lucide.createIcons();
+        }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>

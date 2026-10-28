@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign in — RelayGuard</title>
+  <!-- Google Fonts: Inter & Monospace -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Official Lucide Icons Library with fallback -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script>if (!window.lucide) { document.write('<script src="https://unpkg.com/lucide@latest"><\/script>'); }</script>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="auth.css" />
+</head>
+<body class="auth-page-body">
+
+  <!-- Minimal Nav Header -->
+  <header class="auth-nav-header">
+    <a href="landing.html" class="auth-brand-logo" title="RelayGuard Home">
+      <div class="brand-logo-icon" style="color:var(--primary-blue);">
+        <i data-lucide="shield" class="icon-sidebar"></i>
+      </div>
+      <span>RelayGuard</span>
+    </a>
+    <div class="auth-nav-links">
+      <span class="text-secondary">Don't have an account?</span>
+      <a href="register.html" class="auth-link">Sign up</a>
+    </div>
+  </header>
+
+  <!-- Centered Login Card -->
+  <main class="auth-container-wrapper">
+    <div class="auth-card">
+      <div class="auth-card-header">
+        <div class="auth-brand-icon-centered">
+          <i data-lucide="shield" class="icon-standard"></i>
+        </div>
+        <h1 class="auth-title">Welcome back</h1>
+        <p class="auth-subtitle">Sign in to your RelayGuard developer workspace.</p>
+      </div>
+
+      <div id="authAlert" class="auth-alert error" style="display: none;">
+        <i data-lucide="alert-circle" class="icon-control" style="flex-shrink: 0; margin-top: 1px;"></i>
+        <span id="authAlertText">Invalid email or password.</span>
+      </div>
+
+      <form id="loginForm" class="auth-form" onsubmit="handleLoginSubmit(event)">
+        <div class="auth-field-group">
+          <label class="auth-label" for="loginEmail">Email address</label>
+          <input 
+            type="email" 
+            id="loginEmail" 
+            class="auth-input" 
+            placeholder="developer@acme.com" 
+            required 
+            autocomplete="email"
+            value="sam@acme.com" 
+          />
+        </div>
+
+        <div class="auth-field-group">
+          <div class="auth-field-header">
+            <label class="auth-label" for="loginPassword">Password</label>
+            <a href="forgot-password.html" class="auth-link">Forgot password?</a>
+          </div>
+          <div class="auth-input-wrapper">
+            <input 
+              type="password" 
+              id="loginPassword" 
+              class="auth-input has-toggle" 
+              placeholder="••••••••••••" 
+              required 
+              autocomplete="current-password"
+              value="developer-safe-demo" 
+            />
+            <button type="button" class="auth-pwd-toggle" onclick="togglePasswordVisibility('loginPassword', this)" aria-label="Toggle password visibility">
+              <i data-lucide="eye" class="icon-control"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" id="loginSubmitBtn" class="auth-btn-primary">
+          <span>Sign in</span>
+          <i data-lucide="arrow-right" class="icon-control"></i>
+        </button>
+      </form>
+
+      <div class="auth-card-footer">
+        Protected by RelayGuard session tokens & SHA-256 HMAC encryption.
+      </div>
+    </div>
+  </main>
+
+  <script src="auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) window.lucide.createIcons();
+    });
+
+    function handleLoginSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const alertBox = document.getElementById('authAlert');
+      const alertText = document.getElementById('authAlertText');
+      const submitBtn = document.getElementById('loginSubmitBtn');
+
+      if (!email || !password) {
+        alertBox.style.display = 'flex';
+        alertText.textContent = 'Please provide both your email address and password.';
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<i data-lucide="loader-circle" class="icon-control" style="animation: spin 1s linear infinite;"></i><span>Authenticating...</span>`;
+      if (window.lucide) window.lucide.createIcons();
+
+      setTimeout(() => {
+        // Authenticate user session
+        const users = getRegisteredUsers();
+        let user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+        if (!user) {
+          // If demo email, create mock session
+          user = {
+            id: 'usr_' + Math.random().toString(36).substring(2, 9),
+            name: email.split('@')[0],
+            email: email,
+            role: 'Developer',
+            organization: 'Personal Project'
+          };
+          saveRegisteredUser(user);
+        }
+
+        setCurrentUser(user);
+        window.location.href = 'index.html';
+      }, 700);
+    }
+  </script>
+</body>
+</html>

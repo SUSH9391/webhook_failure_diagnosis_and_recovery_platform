@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create your account — RelayGuard</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Official Lucide Icons Library with fallback -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script>if (!window.lucide) { document.write('<script src="https://unpkg.com/lucide@latest"><\/script>'); }</script>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="auth.css" />
+</head>
+<body class="auth-page-body">
+
+  <!-- Minimal Nav Header -->
+  <header class="auth-nav-header">
+    <a href="landing.html" class="auth-brand-logo" title="RelayGuard Home">
+      <div class="brand-logo-icon" style="color:var(--primary-blue);">
+        <i data-lucide="shield" class="icon-sidebar"></i>
+      </div>
+      <span>RelayGuard</span>
+    </a>
+    <div class="auth-nav-links">
+      <span class="text-secondary">Already have an account?</span>
+      <a href="login.html" class="auth-link">Sign in</a>
+    </div>
+  </header>
+
+  <!-- Centered Register Card -->
+  <main class="auth-container-wrapper">
+    <div class="auth-card">
+      <div class="auth-card-header">
+        <div class="auth-brand-icon-centered">
+          <i data-lucide="shield-plus" class="icon-standard"></i>
+        </div>
+        <h1 class="auth-title">Create your RelayGuard account</h1>
+        <p class="auth-subtitle">Start monitoring and recovering webhook deliveries.</p>
+      </div>
+
+      <div id="authAlert" class="auth-alert error" style="display: none;">
+        <i data-lucide="alert-circle" class="icon-control" style="flex-shrink: 0; margin-top: 1px;"></i>
+        <span id="authAlertText">Please fill in all required fields.</span>
+      </div>
+
+      <form id="registerForm" class="auth-form" onsubmit="handleRegisterSubmit(event)">
+        <div class="auth-field-group">
+          <label class="auth-label" for="regName">Full name</label>
+          <input 
+            type="text" 
+            id="regName" 
+            class="auth-input" 
+            placeholder="Alex Rivera" 
+            required 
+            autocomplete="name"
+          />
+        </div>
+
+        <div class="auth-field-group">
+          <label class="auth-label" for="regEmail">Work email</label>
+          <input 
+            type="email" 
+            id="regEmail" 
+            class="auth-input" 
+            placeholder="alex@acme.com" 
+            required 
+            autocomplete="email"
+          />
+        </div>
+
+        <div class="auth-field-group">
+          <label class="auth-label" for="regPassword">Password</label>
+          <div class="auth-input-wrapper">
+            <input 
+              type="password" 
+              id="regPassword" 
+              class="auth-input has-toggle" 
+              placeholder="At least 8 characters" 
+              required 
+              minlength="8"
+              autocomplete="new-password"
+              oninput="checkPasswordRequirements(this.value)"
+            />
+            <button type="button" class="auth-pwd-toggle" onclick="togglePasswordVisibility('regPassword', this)" aria-label="Toggle password visibility">
+              <i data-lucide="eye" class="icon-control"></i>
+            </button>
+          </div>
+          <div class="password-requirements">
+            <div class="req-item" id="reqLength">
+              <i data-lucide="circle" class="icon-control" style="width:11px; height:11px;"></i>
+              <span>At least 8 characters</span>
+            </div>
+            <div class="req-item" id="reqNumber">
+              <i data-lucide="circle" class="icon-control" style="width:11px; height:11px;"></i>
+              <span>Contains at least one number or symbol</span>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" id="registerSubmitBtn" class="auth-btn-primary">
+          <span>Create account</span>
+          <i data-lucide="arrow-right" class="icon-control"></i>
+        </button>
+      </form>
+
+      <div class="auth-card-footer">
+        By registering, you agree to RelayGuard's developer terms and zero-knowledge data retention policies.
+      </div>
+    </div>
+  </main>
+
+  <script src="auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) window.lucide.createIcons();
+    });
+
+    function checkPasswordRequirements(val) {
+      const reqLength = document.getElementById('reqLength');
+      const reqNumber = document.getElementById('reqNumber');
+      
+      const hasLength = val.length >= 8;
+      const hasNum = /[0-9!@#$%^&*]/.test(val);
+
+      if (reqLength) {
+        reqLength.classList.toggle('met', hasLength);
+        reqLength.querySelector('i').setAttribute('data-lucide', hasLength ? 'circle-check' : 'circle');
+      }
+      if (reqNumber) {
+        reqNumber.classList.toggle('met', hasNum);
+        reqNumber.querySelector('i').setAttribute('data-lucide', hasNum ? 'circle-check' : 'circle');
+      }
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function handleRegisterSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('regName').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const password = document.getElementById('regPassword').value;
+      const alertBox = document.getElementById('authAlert');
+      const alertText = document.getElementById('authAlertText');
+      const submitBtn = document.getElementById('registerSubmitBtn');
+
+      if (!name || !email || !password) {
+        alertBox.style.display = 'flex';
+        alertText.textContent = 'Please complete all required fields.';
+        return;
+      }
+
+      if (password.length < 8) {
+        alertBox.style.display = 'flex';
+        alertText.textContent = 'Password must be at least 8 characters.';
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<i data-lucide="loader-circle" class="icon-control" style="animation: spin 1s linear infinite;"></i><span>Creating account...</span>`;
+      if (window.lucide) window.lucide.createIcons();
+
+      setTimeout(() => {
+        const newUser = {
+          id: 'usr_' + Math.random().toString(36).substring(2, 9),
+          name: name,
+          email: email,
+          role: 'Admin',
+          organization: name + "'s Project"
+        };
+        saveRegisteredUser(newUser);
+
+        // Store pending verification email and redirect to verification screen
+        sessionStorage.setItem('relayguard_pending_verify_email', email);
+        window.location.href = 'verify-email.html';
+      }, 700);
+    }
+  </script>
+</body>
+</html>

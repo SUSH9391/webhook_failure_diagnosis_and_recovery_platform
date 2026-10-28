@@ -1,0 +1,2361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RelayGuard — Overview · Webhook Reliability</title>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <!-- Official Lucide Icons Library (Vanilla JS) with dual CDN fallback -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script>if (!window.lucide) { document.write('<script src="https://unpkg.com/lucide@latest"><\/script>'); }</script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-layout">
+    
+    <!-- Backdrop for overlay drawer / mobile sidebar / modals -->
+    <div id="drawerBackdrop" class="drawer-backdrop" onclick="closeDrawer(); closeAllModals();"></div>
+
+    <!-- 3A. COLLAPSIBLE SIDEBAR (Expanded: 224px, Collapsed: 64px) -->
+    <aside class="sidebar" id="appSidebar">
+      <div class="brand-header-wrap">
+        <a href="landing.html" class="brand-header" title="RelayGuard Home">
+          <div class="brand-logo-icon">
+            <i data-lucide="shield" class="icon-sidebar"></i>
+          </div>
+          <span class="brand-title">RelayGuard</span>
+        </a>
+        <button class="sidebar-toggle-btn" id="sidebarToggleBtn" onclick="toggleSidebarCollapse()" aria-label="Collapse sidebar" title="Collapse sidebar">
+          <i data-lucide="panel-left-close" class="icon-control"></i>
+        </button>
+      </div>
+
+      <nav class="nav-menu">
+        <button class="nav-item active" data-nav="overview" data-tooltip="Overview" aria-label="Overview">
+          <i data-lucide="layout-dashboard" class="icon-sidebar"></i>
+          <span>Overview</span>
+        </button>
+
+        <button class="nav-item" data-nav="deliveries" data-tooltip="Deliveries" aria-label="Deliveries">
+          <i data-lucide="inbox" class="icon-sidebar"></i>
+          <span>Deliveries</span>
+        </button>
+
+        <button class="nav-item" data-nav="failures" data-tooltip="Failures (12)" aria-label="Failures">
+          <i data-lucide="circle-alert" class="icon-sidebar"></i>
+          <span>Failures</span>
+          <span class="badge-counter counter-tabular">12</span>
+        </button>
+
+        <button class="nav-item" data-nav="endpoints" data-tooltip="Endpoints" aria-label="Endpoints">
+          <i data-lucide="webhook" class="icon-sidebar"></i>
+          <span>Endpoints</span>
+        </button>
+
+        <button class="nav-item" data-nav="replays" data-tooltip="Replays" aria-label="Replays">
+          <i data-lucide="rotate-ccw" class="icon-sidebar"></i>
+          <span>Replays</span>
+        </button>
+
+        <button class="nav-item" data-nav="alerts" data-tooltip="Alerts" aria-label="Alerts">
+          <i data-lucide="bell" class="icon-sidebar"></i>
+          <span>Alerts</span>
+        </button>
+
+        <button class="nav-item" data-nav="settings" data-tooltip="Settings" aria-label="Settings">
+          <i data-lucide="settings" class="icon-sidebar"></i>
+          <span>Settings</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="relative-anchor" style="width: 100%;">
+          <button class="project-selector" id="projectSelectorBtn" onclick="toggleProjectDropdown(event)" data-tooltip="Acme App" aria-label="Select project cluster">
+            <div class="project-avatar-box">
+              <i data-lucide="folder-kanban" class="icon-control" style="width: 14px; height: 14px;"></i>
+            </div>
+            <div class="project-text-wrap">
+              <span class="project-eyebrow">Current project</span>
+              <span class="project-title" id="sidebarProjectName">Acme App</span>
+            </div>
+            <i data-lucide="chevron-down" class="chevron-muted icon-control"></i>
+          </button>
+
+          <!-- Upward Project Selector Popover Menu -->
+          <div id="projectDropdownMenu" class="project-dropdown-menu">
+            <div class="search-group-title" style="padding: 4px 8px;">Switch Project</div>
+            <button class="project-menu-item selected" onclick="switchProject('Acme App', 'us-east-1')">
+              <div class="project-avatar-box" style="width:20px; height:20px; font-size:10px;">A</div>
+              <div>
+                <div style="font-weight:600; font-size:13px;">Acme App</div>
+                <div style="font-size:11px; color:var(--text-secondary);">Production · us-east-1</div>
+              </div>
+              <i data-lucide="check" class="icon-control check-icon"></i>
+            </button>
+            <button class="project-menu-item" onclick="switchProject('Stripe Bridge API', 'eu-west-1')">
+              <div class="project-avatar-box" style="width:20px; height:20px; font-size:10px; background:#FEF3C7; color:#D97706;">S</div>
+              <div>
+                <div style="font-weight:500; font-size:13px;">Stripe Bridge API</div>
+                <div style="font-size:11px; color:var(--text-secondary);">Staging · eu-west-1</div>
+              </div>
+            </button>
+            <button class="project-menu-item" onclick="switchProject('Partner Auth Broker', 'ap-southeast-1')">
+              <div class="project-avatar-box" style="width:20px; height:20px; font-size:10px; background:#DCFCE7; color:#16A34A;">P</div>
+              <div>
+                <div style="font-weight:500; font-size:13px;">Partner Auth Broker</div>
+                <div style="font-size:11px; color:var(--text-secondary);">Production · ap-southeast-1</div>
+              </div>
+            </button>
+            <div class="dropdown-divider"></div>
+            <button class="project-menu-item" onclick="showToast('Create new project wizard'); closeAllDropdowns();">
+              <i data-lucide="plus" class="icon-control"></i>
+              <span>Create project</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 3B. FLEXIBLE MAIN WORKSPACE -->
+    <main class="main-workspace">
+      
+      <!-- 4A. Header (Target height: 48-56px) -->
+      <header class="dashboard-header">
+        <div class="header-left-group">
+          <button class="mobile-menu-trigger" onclick="toggleMobileSidebar()" aria-label="Toggle navigation menu" title="Toggle navigation menu">
+            <i data-lucide="menu" class="icon-standard"></i>
+          </button>
+          
+          <!-- (3) Search Bar with Instant Result Dropdown -->
+          <div class="search-input-wrapper">
+            <i data-lucide="search" class="search-icon-svg icon-control"></i>
+            <input type="text" id="topSearchInput" class="search-input" placeholder="Search events, endpoints, or errors..." autocomplete="off" />
+            <span class="search-key-badge">⌘ K</span>
+
+            <!-- Quick Search Results Dropdown Panel -->
+            <div id="searchDropdown" class="search-dropdown-menu">
+              <div class="search-group-title">Deliveries</div>
+              <div class="search-result-item" onclick="selectFromSearch('evt_8f31a2c9')">
+                <div class="search-item-icon">
+                  <i data-lucide="inbox" class="icon-control"></i>
+                </div>
+                <div class="search-item-body">
+                  <div class="search-item-headline">
+                    <span class="search-item-id">evt_8f31a2c9</span>
+                    <span class="status-tag failed" style="font-size:10px; padding:1px 6px;">Failed</span>
+                    <span class="search-item-time">2 min ago</span>
+                  </div>
+                  <span class="search-item-sub">user.created</span>
+                </div>
+              </div>
+
+              <div class="search-group-title">Endpoints</div>
+              <div class="search-result-item" onclick="filterByEndpoint('https://api.example.com/webhooks')">
+                <div class="search-item-icon">
+                  <i data-lucide="webhook" class="icon-control"></i>
+                </div>
+                <div class="search-item-body">
+                  <div class="search-item-headline">https://api.example.com/webhooks</div>
+                  <span class="search-item-sub">User service · 12 deliveries</span>
+                </div>
+              </div>
+
+              <div class="search-group-title">Failures</div>
+              <div class="search-result-item" onclick="filterByError('401')">
+                <div class="search-item-icon" style="color:var(--color-failure);">
+                  <i data-lucide="circle-alert" class="icon-control"></i>
+                </div>
+                <div class="search-item-body">
+                  <div class="search-item-headline" style="color:var(--color-failure);">401 Authentication failures</div>
+                  <span class="search-item-sub">12 deliveries · Last 2 hours</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="header-right-group">
+          <!-- (2) Time Range Selector Dropdown -->
+          <div class="relative-anchor">
+            <button class="control-btn" id="timeRangeTrigger" onclick="toggleTimeRangeDropdown(event)" aria-label="Select date range">
+              <i data-lucide="calendar-days" class="icon-control"></i>
+              <span id="selectedTimeRangeLabel">Last 7 days</span>
+              <i data-lucide="chevron-down" class="icon-control"></i>
+            </button>
+
+            <div id="timeRangeDropdown" class="dropdown-popover-menu">
+              <button class="dropdown-popover-item" onclick="selectTimeRange('Last 24 hours')">Last 24 hours</button>
+              <button class="dropdown-popover-item selected" onclick="selectTimeRange('Last 7 days')">
+                <span>Last 7 days</span>
+                <i data-lucide="check" class="icon-control"></i>
+              </button>
+              <button class="dropdown-popover-item" onclick="selectTimeRange('Last 30 days')">Last 30 days</button>
+              <button class="dropdown-popover-item" onclick="selectTimeRange('Last 90 days')">Last 90 days</button>
+              <div class="dropdown-divider"></div>
+              <button class="dropdown-popover-item" onclick="selectTimeRange('Custom range')">Custom range</button>
+            </div>
+          </div>
+
+          <!-- (4) Notification Bell & Dropdown -->
+          <div class="relative-anchor">
+            <button class="icon-btn" id="notifBellBtn" onclick="toggleNotificationDropdown(event)" aria-label="Notifications" title="Alert notifications">
+              <i data-lucide="bell" class="icon-standard"></i>
+              <span class="unread-dot" id="unreadNotifDot"></span>
+            </button>
+
+            <div id="notificationsDropdown" class="dropdown-popover-menu notif-dropdown-width">
+              <div class="notif-header-row">
+                <span class="notif-title-label">Notifications</span>
+                <button class="notif-action-link" onclick="markAllNotificationsRead()">Mark all as read</button>
+              </div>
+
+              <div class="notif-list-container">
+                <div class="notif-item unread">
+                  <span class="notif-bullet bullet-red"></span>
+                  <div class="notif-content">
+                    <div class="notif-head-text">High failure rate detected</div>
+                    <div class="notif-sub-text">12 deliveries failed for User service</div>
+                    <span class="notif-timestamp">2 min ago</span>
+                  </div>
+                </div>
+
+                <div class="notif-item unread">
+                  <span class="notif-bullet bullet-red"></span>
+                  <div class="notif-content">
+                    <div class="notif-head-text">Endpoint is down</div>
+                    <div class="notif-sub-text">https://api.example.com/webhooks</div>
+                    <span class="notif-timestamp">15 min ago</span>
+                  </div>
+                </div>
+
+                <div class="notif-item">
+                  <span class="notif-bullet bullet-blue"></span>
+                  <div class="notif-content">
+                    <div class="notif-head-text">Retry succeeded</div>
+                    <div class="notif-sub-text">evt_7a9c1d2e</div>
+                    <span class="notif-timestamp">1 hour ago</span>
+                  </div>
+                </div>
+
+                <div class="notif-item">
+                  <span class="notif-bullet bullet-blue"></span>
+                  <div class="notif-content">
+                    <div class="notif-head-text">New endpoint added</div>
+                    <div class="notif-sub-text">Payment service</div>
+                    <span class="notif-timestamp">3 hours ago</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="notif-footer-row">
+                <a href="#" class="view-all-notifs" onclick="showToast('Viewing notification archive'); return false;">View all notifications →</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- (5) User Avatar & Menu -->
+          <div class="relative-anchor">
+            <div class="avatar-badge" id="userAvatarBtn" onclick="toggleUserDropdown(event)" aria-label="User account menu" title="Sam Wilson (Lead Reliability Engineer)">S</div>
+
+            <div id="userDropdown" class="dropdown-popover-menu user-dropdown-width">
+              <div class="user-profile-header">
+                <div class="user-big-avatar" id="userMenuAvatar">S</div>
+                <div class="user-meta-text">
+                  <span class="user-full-name" id="userMenuFullName">Sam Wilson</span>
+                  <span class="user-email-text" id="userMenuEmail">sam@acme.com</span>
+                </div>
+              </div>
+
+              <div class="dropdown-divider"></div>
+
+              <button class="dropdown-menu-link" onclick="showToast('Opening Profile...')">
+                <i data-lucide="user-round" class="icon-standard"></i>
+                <span>Profile</span>
+              </button>
+
+              <button class="dropdown-menu-link" onclick="showToast('Opening Team settings...')">
+                <i data-lucide="users-round" class="icon-standard"></i>
+                <span>Team settings</span>
+              </button>
+
+              <button class="dropdown-menu-link" onclick="showToast('Opening Billing...')">
+                <i data-lucide="credit-card" class="icon-standard"></i>
+                <span>Billing</span>
+              </button>
+
+              <button class="dropdown-menu-link" onclick="showToast('Opening API keys manager...')">
+                <i data-lucide="key-round" class="icon-standard"></i>
+                <span>API keys</span>
+              </button>
+
+              <div class="dropdown-divider"></div>
+
+              <button class="dropdown-menu-link text-danger" onclick="signOutUser()">
+                <i data-lucide="log-out" class="icon-standard"></i>
+                <span>Sign out</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </header>
+
+      <!-- VIEW 1: OVERVIEW -->
+      <div id="viewOverview" class="app-view-panel active">
+        <!-- 4B. Page Heading: Overview & (1) Add Endpoint Button -->
+        <section class="page-heading-row">
+        <div class="heading-text-group">
+          <h1 class="page-title">Overview</h1>
+          <p class="page-subtitle">Monitor webhook reliability and investigate delivery failures</p>
+        </div>
+        <!-- (1) Add Endpoint Primary Button -->
+        <button class="btn-primary-action" onclick="openAddEndpointModal()" aria-label="Add new webhook endpoint">
+          <i data-lucide="plus" class="icon-standard"></i>
+          <span>Add endpoint</span>
+        </button>
+      </section>
+
+      <!-- 4C & 4D. Top Row: Small Square Cards Grouped Left + Delivery Activity Chart Right -->
+      <section class="overview-top-row">
+        <!-- Grouped Square Metric Cards on the Left -->
+        <div class="metrics-squares-group">
+          <!-- 1. Total deliveries -->
+          <div class="metric-card">
+            <div class="metric-card-top">
+              <span class="metric-card-label">Total deliveries</span>
+              <span class="pill-indicator blue num-tabular">↑ 12%</span>
+            </div>
+            <div class="metric-card-bottom">
+              <div class="metric-value">12,480</div>
+              <div class="metric-sparkline-wrap">
+                <svg viewBox="0 0 100 30" preserveAspectRatio="none">
+                  <path d="M0,24 Q25,20 50,22 T80,12 T100,5" fill="none" stroke="#0A66F5" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Successful deliveries -->
+          <div class="metric-card">
+            <div class="metric-card-top">
+              <span class="metric-card-label">Successful deliveries</span>
+              <span class="pill-indicator success num-tabular">95.4%</span>
+            </div>
+            <div class="metric-card-bottom">
+              <div class="metric-value">11,902</div>
+              <div class="metric-sparkline-wrap">
+                <svg viewBox="0 0 100 30" preserveAspectRatio="none">
+                  <path d="M0,26 Q25,22 50,18 T80,10 T100,6" fill="none" stroke="#16A34A" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Failed deliveries -->
+          <div class="metric-card">
+            <div class="metric-card-top">
+              <span class="metric-card-label">Failed deliveries</span>
+              <span class="pill-indicator failure num-tabular">2.5%</span>
+            </div>
+            <div class="metric-card-bottom">
+              <div class="metric-value">312</div>
+              <div class="metric-sparkline-wrap">
+                <svg viewBox="0 0 100 30" preserveAspectRatio="none">
+                  <path d="M0,22 Q30,24 60,16 T90,12 T100,6" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Retrying deliveries -->
+          <div class="metric-card">
+            <div class="metric-card-top">
+              <span class="metric-card-label">Retrying deliveries</span>
+              <span class="pill-indicator blue num-tabular">0.4%</span>
+            </div>
+            <div class="metric-card-bottom">
+              <div class="metric-value">48</div>
+              <div class="metric-sparkline-wrap">
+                <svg viewBox="0 0 100 30" preserveAspectRatio="none">
+                  <path d="M0,24 Q30,20 60,22 T90,14 T100,8" fill="none" stroke="#0A66F5" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div> <!-- End metrics-squares-group -->
+
+        <!-- Failure Breakdown: Horizontal Rectangular Card filling the right side of Row 1 as drawn -->
+        <div class="panel-card failure-breakdown-card" title="Failure breakdown: 40% Timeouts, 30% 5xx, 20% 4xx, 10% Network">
+          <div class="panel-card-header" style="margin-bottom: 8px;">
+            <span class="panel-heading">Failure breakdown</span>
+            <span class="pill-indicator failure num-tabular" style="font-size: 11px; padding: 2px 7px;">312 failures</span>
+          </div>
+          <div class="metric-donut-body">
+            <div class="donut-graphic-compact">
+              <svg width="92" height="92" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="38" fill="none" stroke="#E2E8F0" stroke-width="12"/>
+                <!-- 40% Timeouts (#0A66F5) -->
+                <circle cx="50" cy="50" r="38" fill="none" stroke="#0A66F5" stroke-width="12"
+                        stroke-dasharray="95.5 143.2" stroke-dashoffset="0" transform="rotate(-90 50 50)"/>
+                <!-- 30% 5xx errors (#DC2626) -->
+                <circle cx="50" cy="50" r="38" fill="none" stroke="#DC2626" stroke-width="12"
+                        stroke-dasharray="71.6 167.1" stroke-dashoffset="-95.5" transform="rotate(-90 50 50)"/>
+                <!-- 20% 4xx errors (#0284C7) -->
+                <circle cx="50" cy="50" r="38" fill="none" stroke="#0284C7" stroke-width="12"
+                        stroke-dasharray="47.7 191" stroke-dashoffset="-167.1" transform="rotate(-90 50 50)"/>
+                <!-- 10% Network errors (#93C5FD) -->
+                <circle cx="50" cy="50" r="38" fill="none" stroke="#93C5FD" stroke-width="12"
+                        stroke-dasharray="23.8 214.9" stroke-dashoffset="-214.8" transform="rotate(-90 50 50)"/>
+              </svg>
+              <div class="donut-inner-compact">
+                <span class="donut-center-num">312</span>
+              </div>
+            </div>
+
+            <!-- Self-Explanatory Failure Breakdown Legend Table -->
+            <div class="donut-mini-legend">
+              <div class="legend-header-row">
+                <span class="col-head-reason">Error Reason</span>
+                <span class="col-head-stats">Failures · Share</span>
+              </div>
+              <div class="mini-legend-item">
+                <span class="legend-item-left"><span class="legend-circle circle-blue"></span> Timeouts</span>
+                <span class="legend-item-numbers">
+                  <span class="legend-count">125</span>
+                  <span class="legend-pct-badge pct-blue">40%</span>
+                </span>
+              </div>
+              <div class="mini-legend-item">
+                <span class="legend-item-left"><span class="legend-circle circle-red"></span> 5xx server</span>
+                <span class="legend-item-numbers">
+                  <span class="legend-count">94</span>
+                  <span class="legend-pct-badge pct-red">30%</span>
+                </span>
+              </div>
+              <div class="mini-legend-item">
+                <span class="legend-item-left"><span class="legend-circle" style="background:#0284C7;"></span> 4xx client</span>
+                <span class="legend-item-numbers">
+                  <span class="legend-count">62</span>
+                  <span class="legend-pct-badge pct-teal">20%</span>
+                </span>
+              </div>
+              <div class="mini-legend-item">
+                <span class="legend-item-left"><span class="legend-circle" style="background:#93C5FD;"></span> Network drop</span>
+                <span class="legend-item-numbers">
+                  <span class="legend-count">31</span>
+                  <span class="legend-pct-badge pct-light">10%</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Row 2: Delivery Activity Bar Chart (Full-Width, perfectly proportioned) -->
+      <section class="panel-card activity-chart-card">
+        <div class="panel-card-header">
+          <span class="panel-heading">Delivery activity</span>
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div class="panel-legend">
+              <span class="legend-item"><span class="legend-circle circle-blue"></span> Successful</span>
+              <span class="legend-item"><span class="legend-circle circle-red"></span> Failed</span>
+              <span class="legend-item"><span class="legend-circle circle-amber"></span> Retrying</span>
+            </div>
+            <!-- Chart Frequency Dropdown with matching theme -->
+            <div class="relative-anchor">
+              <button class="select-dropdown-control" id="chartFrequencyTrigger" onclick="toggleChartFrequencyDropdown(event)" aria-label="Select aggregation granularity">
+                <span id="selectedFrequencyLabel">Daily</span>
+                <i data-lucide="chevron-down" class="icon-control"></i>
+              </button>
+
+                <div id="chartFrequencyDropdown" class="dropdown-popover-menu frequency-dropdown-menu">
+                  <button class="dropdown-popover-item selected" onclick="selectChartFrequency('Daily')">
+                    <span>Daily</span>
+                    <i data-lucide="check" class="icon-control"></i>
+                  </button>
+                  <button class="dropdown-popover-item" onclick="selectChartFrequency('Hourly')">
+                    <span>Hourly</span>
+                  </button>
+                  <button class="dropdown-popover-item" onclick="selectChartFrequency('Weekly')">
+                    <span>Weekly</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bar-chart-viewport">
+            <!-- Background horizontal grid guide lines -->
+            <div class="chart-grid-lines">
+              <div class="grid-line" style="bottom: 100%;"></div>
+              <div class="grid-line" style="bottom: 66.6%;"></div>
+              <div class="grid-line" style="bottom: 33.3%;"></div>
+              <div class="grid-line" style="bottom: 0%;"></div>
+            </div>
+
+            <div class="y-axis-labels">
+              <span>1.5K</span>
+              <span>1K</span>
+              <span>500</span>
+              <span>0</span>
+            </div>
+
+            <div class="chart-bars-container">
+              <!-- Oct 15 -->
+              <div class="bar-column" tabindex="0">
+                <div class="bar-tooltip">
+                  <div class="tip-top-header">
+                    <span class="tip-date-badge">Oct 15</span>
+                    <span class="tip-total">Total: 1,300</span>
+                  </div>
+                  <div class="tip-metrics-row">
+                    <span class="tip-metric"><span class="legend-circle circle-blue"></span> Success: <strong>1,180</strong></span>
+                    <span class="tip-metric"><span class="legend-circle circle-amber"></span> Retry: <strong>80</strong></span>
+                    <span class="tip-metric"><span class="legend-circle circle-red"></span> Fail: <strong>40</strong></span>
+                  </div>
+                </div>
+                <div class="bar-stack-rect" style="height: 68%;">
+                  <div class="bar-part part-red" style="flex: 40;" title="Failed: 40"></div>
+                  <div class="bar-part part-amber" style="flex: 80;" title="Retrying: 80"></div>
+                  <div class="bar-part part-blue" style="flex: 1180;" title="Successful: 1,180"></div>
+                </div>
+                <span class="bar-column-caption">Oct 15</span>
+              </div>
+
+              <!-- Oct 16 -->
+              <div class="bar-column" tabindex="0">
+                <div class="bar-tooltip">
+                  <div class="tip-top-header">
+                    <span class="tip-date-badge">Oct 16</span>
+                    <span class="tip-total">Total: 1,420</span>
+                  </div>
+                  <div class="tip-metrics-row">
+                    <span class="tip-metric"><span class="legend-circle circle-blue"></span> Success: <strong>1,320</strong></span>
+                    <span class="tip-metric"><span class="legend-circle circle-amber"></span> Retry: <strong>65</strong></span>
+                    <span class="tip-metric"><span class="legend-circle circle-red"></span> Fail: <strong>35</strong></span>
+                  </div>
+                </div>
+                <div class="bar-stack-rect" style="height: 78%;">
+                  <div class="bar-part part-red" style="flex: 35;" title="Failed: 35"></div>
+                  <div class="bar-part part-amber" style="flex: 65;" title="Retrying: 65"></div>
+                  <div class="bar-part part-blue" style="flex: 1320;" title="Successful: 1,320"></div>
+                </div>
+                <span class="bar-column-caption">Oct 16</span>
+              </div>
+
+              <!-- Oct 17 -->
+              <div class="bar-column" tabindex="0">
+                <div class="bar-tooltip">
+                  <div class="tip-top-header">
+                    <span class="tip-date-badge">Oct 17</span>
+                    <span class="tip-total">Total: 1,490</span>
+                  </div>
+                  <div class="tip-metrics-row">
+                    <span class="tip-metric"><span class="legend-circle circle-blue"></span> Success: <strong>1,410</strong></span>
+                    <span class="tip-metric"><span class="legend-circle circle-amber"></span> Retry: <strong>52</strong></span>
+                    <span class="tip-metric"><span class="legend-circle circle-red"></span> Fail: <strong>28</strong></span>
+                  </div>
+                </div>
+                <div class="bar-stack-rect" style="height: 85%;">
+                  <div class="bar-part part-red" style="flex: 28;" title="Failed: 28"></div>
+                  <div class="bar-part part-amber" style="flex: 52;" title="Retrying: 52"></div>
+                  <div class="bar-part part-blue" style="flex: 1410;" title="Successful: 1,410"></div>
+                </div>
+                <span class="bar-column-caption">Oct 17</span>
+              </div>
+
+              <!-- Oct 18 -->
+              <div class="bar-column" tabindex="0">
+                <div class="bar-tooltip">
+                  <div class="tip-top-header">
+                    <span class="tip-date-badge">Oct 18</span>
+                    <span class="tip-total">Total: 1,180</span>
+                  </div>
+                  <div class="tip-metrics-row">
+                    <span class="tip-metric"><span class="legend-circle circle-blue"></span> Success: <strong>1,020</strong></span>
+                    <span class="tip-metric"><span class="legend-circle circle-amber"></span> Retry: <strong>95</strong></span>
+                    <span class="tip-metric"><span class="legend-circle circle-red"></span> Fail: <strong>65</strong></span>
+                  </div>
+                </div>
+                <div class="bar-stack-rect" style="height: 62%;">
+                  <div class="bar-part part-red" style="flex: 65;" title="Failed: 65"></div>
+                  <div class="bar-part part-amber" style="flex: 95;" title="Retrying: 95"></div>
+                  <div class="bar-part part-blue" style="flex: 1020;" title="Successful: 1,020"></div>
+                </div>
+                <span class="bar-column-caption">Oct 18</span>
+              </div>
+
+              <!-- Oct 19 -->
+              <div class="bar-column" tabindex="0">
+                <div class="bar-tooltip">
+                  <div class="tip-top-header">
+                    <span class="tip-date-badge">Oct 19</span>
+                    <span class="tip-total">Total: 1,400</span>
+                  </div>
+                  <div class="tip-metrics-row">
+                    <span class="tip-metric"><span class="legend-circle circle-blue"></span> Success: <strong>1,290</strong></span>
+                    <span class="tip-metric"><span class="legend-circle circle-amber"></span> Retry: <strong>70</strong></span>
+                    <span class="tip-metric"><span class="legend-circle circle-red"></span> Fail: <strong>40</strong></span>
+                  </div>
+                </div>
+                <div class="bar-stack-rect" style="height: 76%;">
+                  <div class="bar-part part-red" style="flex: 40;" title="Failed: 40"></div>
+                  <div class="bar-part part-amber" style="flex: 70;" title="Retrying: 70"></div>
+                  <div class="bar-part part-blue" style="flex: 1290;" title="Successful: 1,290"></div>
+                </div>
+                <span class="bar-column-caption">Oct 19</span>
+              </div>
+
+              <!-- Oct 20 -->
+              <div class="bar-column" tabindex="0">
+                <div class="bar-tooltip">
+                  <div class="tip-top-header">
+                    <span class="tip-date-badge">Oct 20</span>
+                    <span class="tip-total">Total: 1,470</span>
+                  </div>
+                  <div class="tip-metrics-row">
+                    <span class="tip-metric"><span class="legend-circle circle-blue"></span> Success: <strong>1,380</strong></span>
+                    <span class="tip-metric"><span class="legend-circle circle-amber"></span> Retry: <strong>58</strong></span>
+                    <span class="tip-metric"><span class="legend-circle circle-red"></span> Fail: <strong>32</strong></span>
+                  </div>
+                </div>
+                <div class="bar-stack-rect" style="height: 82%;">
+                  <div class="bar-part part-red" style="flex: 32;" title="Failed: 32"></div>
+                  <div class="bar-part part-amber" style="flex: 58;" title="Retrying: 58"></div>
+                  <div class="bar-part part-blue" style="flex: 1380;" title="Successful: 1,380"></div>
+                </div>
+                <span class="bar-column-caption">Oct 20</span>
+              </div>
+
+              <!-- Oct 21 -->
+              <div class="bar-column active-today" tabindex="0">
+                <div class="bar-tooltip">
+                  <div class="tip-top-header">
+                    <span class="tip-date-badge">Oct 21 (Today)</span>
+                    <span class="tip-total">Total: 1,520</span>
+                  </div>
+                  <div class="tip-metrics-row">
+                    <span class="tip-metric"><span class="legend-circle circle-blue"></span> Success: <strong>1,450</strong></span>
+                    <span class="tip-metric"><span class="legend-circle circle-amber"></span> Retry: <strong>48</strong></span>
+                    <span class="tip-metric"><span class="legend-circle circle-red"></span> Fail: <strong>22</strong></span>
+                  </div>
+                </div>
+                <div class="bar-stack-rect" style="height: 88%;">
+                  <div class="bar-part part-red" style="flex: 22;" title="Failed: 22"></div>
+                  <div class="bar-part part-amber" style="flex: 48;" title="Retrying: 48"></div>
+                  <div class="bar-part part-blue" style="flex: 1450;" title="Successful: 1,450"></div>
+                </div>
+                <span class="bar-column-caption font-semibold">Today</span>
+              </div>
+            </div>
+          </div>
+      </section>
+
+      <!-- 4E. (6) Recent Deliveries (Delivery Row Click opens Drawer) -->
+      <section class="deliveries-work-panel">
+        <div class="deliveries-panel-top">
+          <span class="panel-heading">Recent deliveries</span>
+          <a href="#" class="view-all-action" onclick="showToast('Loading all 12,480 delivery records...'); return false;">View all →</a>
+        </div>
+
+        <div class="table-responsive-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width: 32px;"><input type="checkbox" class="event-checkbox" aria-label="Select all rows" /></th>
+                <th>Event ID</th>
+                <th>Event type</th>
+                <th>Endpoint</th>
+                <th>Status</th>
+                <th>Attempts</th>
+                <th>Duration</th>
+                <th>Time</th>
+                <th style="width: 24px;"></th>
+              </tr>
+            </thead>
+            <tbody id="deliveriesTableBody">
+              <!-- Rendered dynamically via app.js -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+      </div> <!-- End #viewOverview -->
+
+      <!-- VIEW 3: DELIVERIES PAGE (Search, filter, and inspect webhook deliveries) -->
+      <div id="viewDeliveries" class="app-view-panel" style="display: none;">
+        <section class="page-heading-row">
+          <div class="heading-text-group">
+            <h1 class="page-title">Deliveries</h1>
+            <p class="page-subtitle">Search and inspect webhook delivery attempts</p>
+          </div>
+        </section>
+
+        <section class="deliveries-work-panel">
+          <!-- Filter bar with Lucide icons matching theme and real interactive dropdowns -->
+          <div class="table-filter-bar">
+            <div class="filter-controls-left">
+              <!-- Filter by status -->
+              <div class="relative-anchor">
+                <button class="filter-pill-btn" id="filterStatusBtn" onclick="toggleDeliveriesStatusDropdown(event)">
+                  <span id="filterStatusLabel">All statuses</span>
+                  <i data-lucide="chevron-down" class="icon-control"></i>
+                </button>
+                <div id="deliveriesStatusDropdown" class="dropdown-popover-menu" style="left:0; right:auto; min-width: 150px;">
+                  <button class="dropdown-popover-item selected" onclick="setDeliveriesFilter('status', 'All statuses')">
+                    <span>All statuses</span>
+                    <i data-lucide="check" class="icon-control"></i>
+                  </button>
+                  <button class="dropdown-popover-item" onclick="setDeliveriesFilter('status', 'Failed')">
+                    <span>Failed</span>
+                  </button>
+                  <button class="dropdown-popover-item" onclick="setDeliveriesFilter('status', 'Success')">
+                    <span>Success</span>
+                  </button>
+                  <button class="dropdown-popover-item" onclick="setDeliveriesFilter('status', 'Retrying')">
+                    <span>Retrying</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Filter by event type -->
+              <div class="relative-anchor">
+                <button class="filter-pill-btn" id="filterEventTypeBtn" onclick="toggleDeliveriesTypeDropdown(event)">
+                  <span id="filterEventTypeLabel">All event types</span>
+                  <i data-lucide="chevron-down" class="icon-control"></i>
+                </button>
+                <div id="deliveriesTypeDropdown" class="dropdown-popover-menu" style="left:0; right:auto; min-width: 170px;">
+                  <button class="dropdown-popover-item selected" onclick="setDeliveriesFilter('type', 'All event types')">
+                    <span>All event types</span>
+                    <i data-lucide="check" class="icon-control"></i>
+                  </button>
+                  <button class="dropdown-popover-item" onclick="setDeliveriesFilter('type', 'user.created')">
+                    <span>user.created</span>
+                  </button>
+                  <button class="dropdown-popover-item" onclick="setDeliveriesFilter('type', 'order.paid')">
+                    <span>order.paid</span>
+                  </button>
+                  <button class="dropdown-popover-item" onclick="setDeliveriesFilter('type', 'invoice.updated')">
+                    <span>invoice.updated</span>
+                  </button>
+                  <button class="dropdown-popover-item" onclick="setDeliveriesFilter('type', 'user.deleted')">
+                    <span>user.deleted</span>
+                  </button>
+                  <button class="dropdown-popover-item" onclick="setDeliveriesFilter('type', 'subscription.created')">
+                    <span>subscription.created</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Filter by endpoint -->
+              <div class="relative-anchor">
+                <button class="filter-pill-btn" id="filterEndpointBtn" onclick="toggleDeliveriesEndpointDropdown(event)">
+                  <span id="filterEndpointLabel">All endpoints</span>
+                  <i data-lucide="chevron-down" class="icon-control"></i>
+                </button>
+                <div id="deliveriesEndpointDropdown" class="dropdown-popover-menu" style="left:0; right:auto; min-width: 210px;">
+                  <button class="dropdown-popover-item selected" onclick="setDeliveriesFilter('endpoint', 'All endpoints')">
+                    <span>All endpoints</span>
+                    <i data-lucide="check" class="icon-control"></i>
+                  </button>
+                  <button class="dropdown-popover-item" onclick="setDeliveriesFilter('endpoint', 'api.example.com')">
+                    <span>api.example.com</span>
+                  </button>
+                  <button class="dropdown-popover-item" onclick="setDeliveriesFilter('endpoint', 'hooks.acme.com')">
+                    <span>hooks.acme.com</span>
+                  </button>
+                  <button class="dropdown-popover-item" onclick="setDeliveriesFilter('endpoint', 'api.billing.com')">
+                    <span>api.billing.com</span>
+                  </button>
+                  <button class="dropdown-popover-item" onclick="setDeliveriesFilter('endpoint', 'webhooks.acme.com')">
+                    <span>webhooks.acme.com</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Filter by date range -->
+              <div class="relative-anchor">
+                <button class="filter-pill-btn" id="deliveriesDateTrigger" onclick="toggleDeliveriesDateDropdown(event)">
+                  <i data-lucide="calendar-days" class="icon-control"></i>
+                  <span id="filterDateLabel">Last 7 days</span>
+                  <i data-lucide="chevron-down" class="icon-control"></i>
+                </button>
+                <div id="deliveriesDateDropdown" class="dropdown-popover-menu" style="left:0; right:auto; min-width: 160px;">
+                  <button class="dropdown-popover-item" onclick="setDeliveriesFilter('date', 'Last 24 hours')">Last 24 hours</button>
+                  <button class="dropdown-popover-item selected" onclick="setDeliveriesFilter('date', 'Last 7 days')">
+                    <span>Last 7 days</span>
+                    <i data-lucide="check" class="icon-control"></i>
+                  </button>
+                  <button class="dropdown-popover-item" onclick="setDeliveriesFilter('date', 'Last 30 days')">Last 30 days</button>
+                  <button class="dropdown-popover-item" onclick="setDeliveriesFilter('date', 'Last 90 days')">Last 90 days</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-controls-right">
+              <!-- Advanced filters toggle -->
+              <div class="relative-anchor">
+                <button class="icon-header-btn" id="deliveriesFilterBtn" title="Advanced filters" aria-label="Advanced filters" onclick="toggleDeliveriesAdvancedFilter(event)">
+                  <i data-lucide="list-filter" class="icon-control"></i>
+                </button>
+                <div id="deliveriesFilterMenu" class="dropdown-popover-menu" style="right:0; left:auto; min-width: 190px;">
+                  <div style="padding: 6px 10px; font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em;">Quick Presets</div>
+                  <button class="dropdown-popover-item" onclick="applyDeliveryPreset('failures_only')">
+                    <span>⚠️ Failures only</span>
+                  </button>
+                  <button class="dropdown-popover-item" onclick="applyDeliveryPreset('retries_active')">
+                    <span>🔄 Active retries</span>
+                  </button>
+                  <button class="dropdown-popover-item" onclick="applyDeliveryPreset('high_latency')">
+                    <span>⏱ High latency (>10s)</span>
+                  </button>
+                  <div class="dropdown-divider"></div>
+                  <button class="dropdown-popover-item" onclick="resetDeliveriesFilters()">
+                    <span>Clear all filters</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Sort Order Toggle -->
+              <div class="relative-anchor">
+                <button class="icon-header-btn" id="deliveriesSortBtn" title="Sort order" aria-label="Sort order" onclick="toggleDeliveriesSortMenu(event)">
+                  <i data-lucide="arrow-up-down" class="icon-control"></i>
+                </button>
+                <div id="deliveriesSortMenu" class="dropdown-popover-menu" style="right:0; left:auto; min-width: 170px;">
+                  <div style="padding: 6px 10px; font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em;">Sort By</div>
+                  <button class="dropdown-popover-item selected" id="sortOptionNewest" onclick="setDeliveriesSort('newest')">
+                    <span>Newest first</span>
+                    <i data-lucide="check" class="icon-control"></i>
+                  </button>
+                  <button class="dropdown-popover-item" id="sortOptionOldest" onclick="setDeliveriesSort('oldest')">
+                    <span>Oldest first</span>
+                  </button>
+                  <button class="dropdown-popover-item" id="sortOptionAttempts" onclick="setDeliveriesSort('attempts')">
+                    <span>Most attempts</span>
+                  </button>
+                  <button class="dropdown-popover-item" id="sortOptionLatency" onclick="setDeliveriesSort('latency')">
+                    <span>Highest duration</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="table-responsive-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Event ID</th>
+                  <th>Event type</th>
+                  <th>Endpoint</th>
+                  <th>Status</th>
+                  <th>Attempts</th>
+                  <th>Last attempt</th>
+                  <th style="width: 24px;"></th>
+                </tr>
+              </thead>
+              <tbody id="deliveriesPageViewTableBody">
+                <!-- Populated dynamically or seeded with delivery records -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Footer with chevron-left and chevron-right -->
+          <div class="table-pagination-footer">
+            <span class="pagination-info">Showing 1–5 of 248</span>
+            <div class="pagination-controls">
+              <button class="page-btn" aria-label="Previous page" onclick="showToast('Previous page')">
+                <i data-lucide="chevron-left" class="icon-control"></i>
+              </button>
+              <button class="page-btn active">1</button>
+              <button class="page-btn" onclick="showToast('Page 2')">2</button>
+              <button class="page-btn" onclick="showToast('Page 3')">3</button>
+              <span class="pagination-ellipsis">…</span>
+              <button class="page-btn" onclick="showToast('Page 50')">50</button>
+              <button class="page-btn" aria-label="Next page" onclick="showToast('Next page')">
+                <i data-lucide="chevron-right" class="icon-control"></i>
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- VIEW 4: FAILURES PAGE (Investigate failure patterns and recommended fixes) -->
+      <div id="viewFailures" class="app-view-panel" style="display: none;">
+        <section class="page-heading-row">
+          <div class="heading-text-group">
+            <h1 class="page-title">Failures</h1>
+            <p class="page-subtitle">Investigate failed deliveries and recommended fixes</p>
+          </div>
+        </section>
+
+        <!-- Failures Top KPI Cards with Sparkline Graphs & Trend Indicators (Matching Overview Window) -->
+        <section class="overview-top-row" style="margin-bottom: 20px; justify-content: flex-start;">
+          <div class="metrics-squares-group" style="display: flex; flex-direction: row; align-items: center; gap: 10px; justify-content: flex-start;">
+            <!-- 1. Open Failures -->
+            <div class="metric-card">
+              <div class="metric-card-top">
+                <span class="metric-card-label" style="display:flex; align-items:center; gap:5px;">
+                  <i data-lucide="circle-alert" class="icon-control" style="color:var(--color-failure);"></i>
+                  Open failures
+                </span>
+                <span class="pill-indicator failure num-tabular">↑ 4.2%</span>
+              </div>
+              <div class="metric-card-bottom">
+                <div class="metric-value">312</div>
+                <div class="metric-sparkline-wrap">
+                  <svg viewBox="0 0 100 30" preserveAspectRatio="none">
+                    <path d="M0,26 Q20,24 40,18 T70,14 T100,5" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Recurring Issues -->
+            <div class="metric-card">
+              <div class="metric-card-top">
+                <span class="metric-card-label" style="display:flex; align-items:center; gap:5px;">
+                  <i data-lucide="triangle-alert" class="icon-control" style="color:var(--color-warning);"></i>
+                  Recurring issues
+                </span>
+                <span class="pill-indicator warning num-tabular" style="background:rgba(217, 119, 6, 0.1); color:#D97706;">8 active</span>
+              </div>
+              <div class="metric-card-bottom">
+                <div class="metric-value">8</div>
+                <div class="metric-sparkline-wrap">
+                  <svg viewBox="0 0 100 30" preserveAspectRatio="none">
+                    <path d="M0,18 Q30,12 55,20 T80,10 T100,8" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. Exhausted Retries -->
+            <div class="metric-card">
+              <div class="metric-card-top">
+                <span class="metric-card-label" style="display:flex; align-items:center; gap:5px;">
+                  <i data-lucide="ban" class="icon-control" style="color:#64748B;"></i>
+                  Exhausted retries
+                </span>
+                <span class="pill-indicator failure num-tabular">24 maxed</span>
+              </div>
+              <div class="metric-card-bottom">
+                <div class="metric-value">24</div>
+                <div class="metric-sparkline-wrap">
+                  <svg viewBox="0 0 100 30" preserveAspectRatio="none">
+                    <path d="M0,22 Q25,25 50,15 T75,18 T100,10" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. Recovery Rate -->
+            <div class="metric-card">
+              <div class="metric-card-top">
+                <span class="metric-card-label" style="display:flex; align-items:center; gap:5px;">
+                  <i data-lucide="circle-check" class="icon-control" style="color:var(--color-success);"></i>
+                  Auto-recovered
+                </span>
+                <span class="pill-indicator success num-tabular">91.4%</span>
+              </div>
+              <div class="metric-card-bottom">
+                <div class="metric-value">91.4%</div>
+                <div class="metric-sparkline-wrap">
+                  <svg viewBox="0 0 100 30" preserveAspectRatio="none">
+                    <path d="M0,24 Q30,18 60,14 T85,8 T100,4" fill="none" stroke="#16A34A" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="deliveries-work-panel">
+          <div class="view-subtab-bar">
+            <button class="view-subtab active" onclick="switchFailureSubtab(this, 'groups')">
+              <i data-lucide="layers" class="icon-control"></i>
+              <span>Failure groups</span>
+            </button>
+            <button class="view-subtab" onclick="switchFailureSubtab(this, 'recent')">
+              <i data-lucide="clock" class="icon-control"></i>
+              <span>Recent failures</span>
+            </button>
+          </div>
+
+          <div class="table-responsive-container">
+            <table class="data-table">
+              <thead id="failuresTableHead">
+                <tr>
+                  <th>Error type</th>
+                  <th>HTTP code</th>
+                  <th>Affected deliveries</th>
+                  <th>Last seen</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="failuresTableBody">
+                <!-- Rendered dynamically via switchFailureSubtab / renderFailuresView() -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- VIEW 5: ENDPOINTS PAGE (Manage and monitor your webhook endpoints) -->
+      <div id="viewEndpoints" class="app-view-panel" style="display: none;">
+        <section class="page-heading-row">
+          <div class="heading-text-group">
+            <h1 class="page-title">Endpoints</h1>
+            <p class="page-subtitle">Manage destinations receiving webhook events</p>
+          </div>
+          <button class="btn-primary-action" onclick="openAddEndpointModal()" aria-label="Add new endpoint">
+            <i data-lucide="plus" class="icon-standard"></i>
+            <span>Add endpoint</span>
+          </button>
+        </section>
+
+        <section class="deliveries-work-panel">
+          <div class="table-responsive-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Endpoint URL</th>
+                  <th>Health</th>
+                  <th>Success rate</th>
+                  <th>Last delivery</th>
+                  <th style="width: 40px; text-align: center;">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="font-semibold">User service</td>
+                  <td>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                      <i data-lucide="link" class="icon-control text-muted"></i>
+                      <span class="code-url">https://api.example.com/v1/users</span>
+                      <button class="icon-copy-btn" onclick="copyToClipboard('https://api.example.com/v1/users', this)" title="Copy URL" aria-label="Copy URL">
+                        <i data-lucide="copy" class="icon-control"></i>
+                      </button>
+                    </div>
+                  </td>
+                  <td><span class="health-badge health-healthy"><i data-lucide="circle-check" class="icon-control"></i> Healthy</span></td>
+                  <td class="num-tabular font-medium">99.2%</td>
+                  <td class="num-tabular text-muted">2 min ago</td>
+                  <td style="text-align: center;">
+                    <div class="relative-anchor">
+                      <button class="icon-more-btn" onclick="toggleEndpointActionMenu(event, 'endpointMenu1')" title="Endpoint settings" aria-label="Endpoint settings">
+                        <i data-lucide="ellipsis" class="icon-control"></i>
+                      </button>
+                      <div id="endpointMenu1" class="dropdown-popover-menu endpoint-actions-menu">
+                        <button class="dropdown-popover-item" onclick="testEndpointPing('User service', 'https://api.example.com/v1/users')">
+                          <span>⚡ Test ping</span>
+                        </button>
+                        <button class="dropdown-popover-item" onclick="editEndpointSettings('User service', 'https://api.example.com/v1/users')">
+                          <span>⚙️ Configure</span>
+                        </button>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-popover-item" onclick="toggleEndpointState('User service')">
+                          <span style="color:var(--color-warning);">Disable endpoint</span>
+                        </button>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="font-semibold">Order service</td>
+                  <td>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                      <i data-lucide="link" class="icon-control text-muted"></i>
+                      <span class="code-url">https://hooks.acme.com/orders</span>
+                      <button class="icon-copy-btn" onclick="copyToClipboard('https://hooks.acme.com/orders', this)" title="Copy URL" aria-label="Copy URL">
+                        <i data-lucide="copy" class="icon-control"></i>
+                      </button>
+                    </div>
+                  </td>
+                  <td><span class="health-badge health-degraded"><i data-lucide="triangle-alert" class="icon-control"></i> Degraded</span></td>
+                  <td class="num-tabular font-medium">92.4%</td>
+                  <td class="num-tabular text-muted">8 min ago</td>
+                  <td style="text-align: center;">
+                    <div class="relative-anchor">
+                      <button class="icon-more-btn" onclick="toggleEndpointActionMenu(event, 'endpointMenu2')" title="Endpoint settings" aria-label="Endpoint settings">
+                        <i data-lucide="ellipsis" class="icon-control"></i>
+                      </button>
+                      <div id="endpointMenu2" class="dropdown-popover-menu endpoint-actions-menu">
+                        <button class="dropdown-popover-item" onclick="testEndpointPing('Order service', 'https://hooks.acme.com/orders')">
+                          <span>⚡ Test ping</span>
+                        </button>
+                        <button class="dropdown-popover-item" onclick="editEndpointSettings('Order service', 'https://hooks.acme.com/orders')">
+                          <span>⚙️ Configure</span>
+                        </button>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-popover-item" onclick="toggleEndpointState('Order service')">
+                          <span style="color:var(--color-warning);">Disable endpoint</span>
+                        </button>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="font-semibold">Billing service</td>
+                  <td>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                      <i data-lucide="link" class="icon-control text-muted"></i>
+                      <span class="code-url">https://api.billing.com/v1/invoices</span>
+                      <button class="icon-copy-btn" onclick="copyToClipboard('https://api.billing.com/v1/invoices', this)" title="Copy URL" aria-label="Copy URL">
+                        <i data-lucide="copy" class="icon-control"></i>
+                      </button>
+                    </div>
+                  </td>
+                  <td><span class="health-badge health-healthy"><i data-lucide="circle-check" class="icon-control"></i> Healthy</span></td>
+                  <td class="num-tabular font-medium">98.1%</td>
+                  <td class="num-tabular text-muted">15 min ago</td>
+                  <td style="text-align: center;">
+                    <div class="relative-anchor">
+                      <button class="icon-more-btn" onclick="toggleEndpointActionMenu(event, 'endpointMenu3')" title="Endpoint settings" aria-label="Endpoint settings">
+                        <i data-lucide="ellipsis" class="icon-control"></i>
+                      </button>
+                      <div id="endpointMenu3" class="dropdown-popover-menu endpoint-actions-menu">
+                        <button class="dropdown-popover-item" onclick="testEndpointPing('Billing service', 'https://api.billing.com/v1/invoices')">
+                          <span>⚡ Test ping</span>
+                        </button>
+                        <button class="dropdown-popover-item" onclick="editEndpointSettings('Billing service', 'https://api.billing.com/v1/invoices')">
+                          <span>⚙️ Configure</span>
+                        </button>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-popover-item" onclick="toggleEndpointState('Billing service')">
+                          <span style="color:var(--color-warning);">Disable endpoint</span>
+                        </button>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="font-semibold">Analytics</td>
+                  <td>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                      <i data-lucide="link" class="icon-control text-muted"></i>
+                      <span class="code-url">https://webhooks.analytics.acme.io/ingest</span>
+                      <button class="icon-copy-btn" onclick="copyToClipboard('https://webhooks.analytics.acme.io/ingest', this)" title="Copy URL" aria-label="Copy URL">
+                        <i data-lucide="copy" class="icon-control"></i>
+                      </button>
+                    </div>
+                  </td>
+                  <td><span class="health-badge health-unhealthy"><i data-lucide="circle-x" class="icon-control"></i> Unhealthy</span></td>
+                  <td class="num-tabular font-medium">78.6%</td>
+                  <td class="num-tabular text-muted">1 hour ago</td>
+                  <td style="text-align: center;">
+                    <div class="relative-anchor">
+                      <button class="icon-more-btn" onclick="toggleEndpointActionMenu(event, 'endpointMenu4')" title="Endpoint settings" aria-label="Endpoint settings">
+                        <i data-lucide="ellipsis" class="icon-control"></i>
+                      </button>
+                      <div id="endpointMenu4" class="dropdown-popover-menu endpoint-actions-menu">
+                        <button class="dropdown-popover-item" onclick="testEndpointPing('Analytics', 'https://webhooks.analytics.acme.io/ingest')">
+                          <span>⚡ Test ping</span>
+                        </button>
+                        <button class="dropdown-popover-item" onclick="editEndpointSettings('Analytics', 'https://webhooks.analytics.acme.io/ingest')">
+                          <span>⚙️ Configure</span>
+                        </button>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-popover-item" onclick="toggleEndpointState('Analytics')">
+                          <span style="color:var(--color-warning);">Disable endpoint</span>
+                        </button>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="font-semibold">CRM</td>
+                  <td>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                      <i data-lucide="link" class="icon-control text-muted"></i>
+                      <span class="code-url">https://crm.example.com/sync</span>
+                      <button class="icon-copy-btn" onclick="copyToClipboard('https://crm.example.com/sync', this)" title="Copy URL" aria-label="Copy URL">
+                        <i data-lucide="copy" class="icon-control"></i>
+                      </button>
+                    </div>
+                  </td>
+                  <td><span class="health-badge health-healthy"><i data-lucide="circle-check" class="icon-control"></i> Healthy</span></td>
+                  <td class="num-tabular font-medium">96.8%</td>
+                  <td class="num-tabular text-muted">3 hours ago</td>
+                  <td style="text-align: center;">
+                    <div class="relative-anchor">
+                      <button class="icon-more-btn" onclick="toggleEndpointActionMenu(event, 'endpointMenu5')" title="Endpoint settings" aria-label="Endpoint settings">
+                        <i data-lucide="ellipsis" class="icon-control"></i>
+                      </button>
+                      <div id="endpointMenu5" class="dropdown-popover-menu endpoint-actions-menu">
+                        <button class="dropdown-popover-item" onclick="testEndpointPing('CRM', 'https://crm.example.com/sync')">
+                          <span>⚡ Test ping</span>
+                        </button>
+                        <button class="dropdown-popover-item" onclick="editEndpointSettings('CRM', 'https://crm.example.com/sync')">
+                          <span>⚙️ Configure</span>
+                        </button>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-popover-item" onclick="toggleEndpointState('CRM')">
+                          <span style="color:var(--color-warning);">Disable endpoint</span>
+                        </button>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- VIEW 6: REPLAYS PAGE (View and manage replayed events) -->
+      <div id="viewReplays" class="app-view-panel" style="display: none;">
+        <section class="page-heading-row">
+          <div class="heading-text-group">
+            <h1 class="page-title">Replays</h1>
+            <p class="page-subtitle">Events replayed as new deliveries with traceability</p>
+          </div>
+          <button class="btn-primary-action" onclick="showToast('Select events from Deliveries or Failures to replay')" aria-label="Replay batch">
+            <i data-lucide="rotate-ccw" class="icon-standard"></i>
+            <span>Replay batch</span>
+          </button>
+        </section>
+
+        <section class="deliveries-work-panel">
+          <div class="table-responsive-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Event ID</th>
+                  <th>Original event</th>
+                  <th>Endpoint</th>
+                  <th>Status</th>
+                  <th>Triggered by</th>
+                  <th>Time</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="table-row-clickable" onclick="openDrawerWithDelivery('evt_8f31a2c9')">
+                  <td class="id-mono"><span class="id-token">rpl_7a3c1d2e</span></td>
+                  <td class="id-mono text-muted">evt_8f31a2c9</td>
+                  <td class="endpoint-cell"><span class="endpoint-name">api.example.com/v1</span></td>
+                  <td><span class="status-pill status-success"><i data-lucide="circle-check" class="icon-control"></i> Success</span></td>
+                  <td class="text-secondary">You</td>
+                  <td class="num-tabular text-muted">12 min ago</td>
+                  <td><button class="btn-table-action" onclick="event.stopPropagation(); openDrawerWithDelivery('evt_8f31a2c9')">View</button></td>
+                </tr>
+                <tr class="table-row-clickable" onclick="openDrawerWithDelivery('evt_d9f7c2a1')">
+                  <td class="id-mono"><span class="id-token">rpl_0e4b5d1f</span></td>
+                  <td class="id-mono text-muted">evt_d9f7c2a1</td>
+                  <td class="endpoint-cell"><span class="endpoint-name">webhooks.acme.co</span></td>
+                  <td><span class="status-pill status-danger"><i data-lucide="circle-x" class="icon-control"></i> Failed</span></td>
+                  <td class="text-secondary">You</td>
+                  <td class="num-tabular text-muted">1 hour ago</td>
+                  <td><button class="btn-table-action" onclick="event.stopPropagation(); openDrawerWithDelivery('evt_d9f7c2a1')">View</button></td>
+                </tr>
+                <tr class="table-row-clickable" onclick="openDrawerWithDelivery('evt_5d72b1a0')">
+                  <td class="id-mono"><span class="id-token">rpl_2c9f4b6a</span></td>
+                  <td class="id-mono text-muted">evt_5d72b1a0</td>
+                  <td class="endpoint-cell"><span class="endpoint-name">hooks.acme.com/o</span></td>
+                  <td><span class="status-pill status-success"><i data-lucide="circle-check" class="icon-control"></i> Success</span></td>
+                  <td class="text-secondary">Automated Rule</td>
+                  <td class="num-tabular text-muted">3 hours ago</td>
+                  <td><button class="btn-table-action" onclick="event.stopPropagation(); openDrawerWithDelivery('evt_5d72b1a0')">View</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- VIEW 7: ALERTS PAGE (Configure notifications for failures and issues) -->
+      <div id="viewAlerts" class="app-view-panel" style="display: none;">
+        <section class="page-heading-row">
+          <div class="heading-text-group">
+            <h1 class="page-title">Alerts</h1>
+            <p class="page-subtitle">Get notified about webhook delivery issues</p>
+          </div>
+          <button class="btn-primary-action" onclick="showToast('Create alert rule modal')" aria-label="New alert">
+            <i data-lucide="plus" class="icon-standard"></i>
+            <span>New alert</span>
+          </button>
+        </section>
+
+        <section class="deliveries-work-panel">
+          <div class="table-responsive-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Alert name</th>
+                  <th>Condition</th>
+                  <th>Notification channels</th>
+                  <th>Status</th>
+                  <th style="width: 40px; text-align: center;">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="font-semibold">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <i data-lucide="bell-ring" class="icon-control text-primary"></i>
+                      <span>High failure rate</span>
+                    </div>
+                  </td>
+                  <td class="text-secondary">> 10% failures in 10 min</td>
+                  <td>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                      <i data-lucide="mail" class="icon-control text-muted"></i>
+                      <span>Email, Slack</span>
+                    </div>
+                  </td>
+                  <td>
+                    <button class="status-pill status-success" onclick="toggleAlertState(this, 'High failure rate')" title="Click to toggle alert status" aria-label="Toggle High failure rate alert">
+                      <i data-lucide="bell" class="icon-control"></i>
+                      <span>Enabled</span>
+                    </button>
+                  </td>
+                  <td style="text-align:center;">
+                    <div class="relative-anchor">
+                      <button class="icon-more-btn" onclick="toggleAlertActionMenu(event, 'alertMenu1')" title="Alert options" aria-label="Alert options">
+                        <i data-lucide="ellipsis" class="icon-control"></i>
+                      </button>
+                      <div id="alertMenu1" class="dropdown-popover-menu endpoint-actions-menu">
+                        <button class="dropdown-popover-item" onclick="editAlertCondition('High failure rate', '> 10% failures in 10 min')">
+                          <span>⚙️ Edit condition</span>
+                        </button>
+                        <button class="dropdown-popover-item" onclick="testAlertNotification('High failure rate')">
+                          <span>🔔 Test notification</span>
+                        </button>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-popover-item" onclick="deleteAlertRule(this, 'High failure rate')">
+                          <span style="color:var(--color-failure);">Delete alert</span>
+                        </button>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="font-semibold">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <i data-lucide="triangle-alert" class="icon-control text-warning"></i>
+                      <span>Endpoint down</span>
+                    </div>
+                  </td>
+                  <td class="text-secondary">Endpoint unreachable (5 consecutive)</td>
+                  <td>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                      <i data-lucide="mail" class="icon-control text-muted"></i>
+                      <span>Email</span>
+                    </div>
+                  </td>
+                  <td>
+                    <button class="status-pill status-success" onclick="toggleAlertState(this, 'Endpoint down')" title="Click to toggle alert status" aria-label="Toggle Endpoint down alert">
+                      <i data-lucide="bell" class="icon-control"></i>
+                      <span>Enabled</span>
+                    </button>
+                  </td>
+                  <td style="text-align:center;">
+                    <div class="relative-anchor">
+                      <button class="icon-more-btn" onclick="toggleAlertActionMenu(event, 'alertMenu2')" title="Alert options" aria-label="Alert options">
+                        <i data-lucide="ellipsis" class="icon-control"></i>
+                      </button>
+                      <div id="alertMenu2" class="dropdown-popover-menu endpoint-actions-menu">
+                        <button class="dropdown-popover-item" onclick="editAlertCondition('Endpoint down', 'Endpoint unreachable (5 consecutive)')">
+                          <span>⚙️ Edit condition</span>
+                        </button>
+                        <button class="dropdown-popover-item" onclick="testAlertNotification('Endpoint down')">
+                          <span>🔔 Test notification</span>
+                        </button>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-popover-item" onclick="deleteAlertRule(this, 'Endpoint down')">
+                          <span style="color:var(--color-failure);">Delete alert</span>
+                        </button>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="font-semibold">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <i data-lucide="ban" class="icon-control text-muted"></i>
+                      <span>Retry exhausted</span>
+                    </div>
+                  </td>
+                  <td class="text-secondary">Retries exceeded on critical webhook</td>
+                  <td>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                      <i data-lucide="webhook" class="icon-control text-muted"></i>
+                      <span>PagerDuty webhook</span>
+                    </div>
+                  </td>
+                  <td>
+                    <button class="status-pill status-danger" onclick="toggleAlertState(this, 'Retry exhausted')" title="Click to toggle alert status" aria-label="Toggle Retry exhausted alert">
+                      <i data-lucide="bell-off" class="icon-control"></i>
+                      <span>Disabled</span>
+                    </button>
+                  </td>
+                  <td style="text-align:center;">
+                    <div class="relative-anchor">
+                      <button class="icon-more-btn" onclick="toggleAlertActionMenu(event, 'alertMenu3')" title="Alert options" aria-label="Alert options">
+                        <i data-lucide="ellipsis" class="icon-control"></i>
+                      </button>
+                      <div id="alertMenu3" class="dropdown-popover-menu endpoint-actions-menu">
+                        <button class="dropdown-popover-item" onclick="editAlertCondition('Retry exhausted', 'Retries exceeded on critical webhook')">
+                          <span>⚙️ Edit condition</span>
+                        </button>
+                        <button class="dropdown-popover-item" onclick="testAlertNotification('Retry exhausted')">
+                          <span>🔔 Test notification</span>
+                        </button>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-popover-item" onclick="deleteAlertRule(this, 'Retry exhausted')">
+                          <span style="color:var(--color-failure);">Delete alert</span>
+                        </button>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <!-- VIEW 8: SETTINGS PAGE (Supabase-inspired flat two-column layout) -->
+      <div id="viewSettings" class="app-view-panel" style="display: none;">
+        <section class="page-heading-row" style="margin-bottom: 8px;">
+          <div class="heading-text-group">
+            <h1 class="page-title">Settings</h1>
+            <p class="page-subtitle">Manage your project, team, and webhook reliability preferences.</p>
+          </div>
+        </section>
+
+        <!-- Two-Column Settings Layout: Nav on left, flat content on right -->
+        <div class="settings-two-col-layout">
+          <!-- Left: Settings Navigation Column (200-220px) -->
+          <nav class="settings-nav-column" aria-label="Settings Navigation">
+            <button class="settings-nav-item active" onclick="switchSettingsSection(this, 'general')">
+              <i data-lucide="settings" class="icon-control"></i>
+              <span>General</span>
+            </button>
+            <button class="settings-nav-item" onclick="switchSettingsSection(this, 'team')">
+              <i data-lucide="users-round" class="icon-control"></i>
+              <span>Team</span>
+            </button>
+            <button class="settings-nav-item" onclick="switchSettingsSection(this, 'apikeys')">
+              <i data-lucide="key-round" class="icon-control"></i>
+              <span>API keys</span>
+            </button>
+            <button class="settings-nav-item" onclick="switchSettingsSection(this, 'notifications')">
+              <i data-lucide="bell" class="icon-control"></i>
+              <span>Notifications</span>
+            </button>
+            <button class="settings-nav-item" onclick="switchSettingsSection(this, 'delivery')">
+              <i data-lucide="refresh-cw" class="icon-control"></i>
+              <span>Delivery & retry</span>
+            </button>
+            <button class="settings-nav-item" onclick="switchSettingsSection(this, 'security')">
+              <i data-lucide="shield-check" class="icon-control"></i>
+              <span>Security</span>
+            </button>
+            <button class="settings-nav-item" onclick="switchSettingsSection(this, 'billing')">
+              <i data-lucide="credit-card" class="icon-control"></i>
+              <span>Billing</span>
+            </button>
+          </nav>
+
+          <!-- Right: Main Settings Content Column (Flat, clean, unnested) -->
+          <div class="settings-content-column">
+            
+            <!-- SECTION 1: GENERAL -->
+            <div id="settingsSecGeneral" class="settings-subpanel active">
+              <div class="settings-group">
+                <div class="settings-group-header">
+                  <h2 class="settings-group-title">Project details</h2>
+                  <p class="settings-group-desc">Configure the primary identity and regional preferences for this RelayGuard project.</p>
+                </div>
+
+                <div class="settings-field-grid">
+                  <div class="settings-field-row">
+                    <label class="settings-label" for="settingsProjectName">Project name</label>
+                    <input type="text" class="input-glass" id="settingsProjectName" value="Acme App Production" />
+                    <span class="settings-help">The display name shown across alert summaries and team notifications.</span>
+                  </div>
+                  <div class="settings-field-row">
+                    <label class="settings-label">Project identifier</label>
+                    <div style="position: relative;">
+                      <input type="text" class="input-glass" value="proj_8f31a2c9" readonly />
+                      <button class="icon-copy-btn" onclick="copyToClipboard('proj_8f31a2c9', this)" title="Copy Project ID" aria-label="Copy Project ID" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%);">
+                        <i data-lucide="copy" class="icon-control"></i>
+                      </button>
+                    </div>
+                    <span class="settings-help">Unique immutable tenant key for API authorization.</span>
+                  </div>
+                </div>
+
+                <div class="settings-field-row">
+                  <label class="settings-label" for="settingsTimezone">Default timezone</label>
+                  <select class="input-glass" id="settingsTimezone" style="max-width: 380px;">
+                    <option selected>UTC (Coordinated Universal Time)</option>
+                    <option>America/New_York (EST / EDT)</option>
+                    <option>America/Los_Angeles (PST / PDT)</option>
+                    <option>Europe/London (GMT / BST)</option>
+                    <option>Asia/Kolkata (IST, +05:30)</option>
+                    <option>Asia/Tokyo (JST, +09:00)</option>
+                  </select>
+                  <span class="settings-help">All delivery timeline graphs and failure logs default to this timezone.</span>
+                </div>
+
+                <div class="settings-action-bar">
+                  <button class="btn-cancel" onclick="showToast('Changes discarded')">Cancel</button>
+                  <button class="btn-primary-action" onclick="showToast('Project details saved successfully!')">
+                    <span>Save changes</span>
+                  </button>
+                </div>
+              </div>
+
+              <hr class="settings-divider" />
+
+              <div class="settings-group">
+                <div class="settings-group-header">
+                  <h2 class="settings-group-title" style="color: var(--color-failure);">Danger Zone</h2>
+                  <p class="settings-group-desc">Irreversible operational actions for this project environment.</p>
+                </div>
+
+                <div class="settings-destructive-box">
+                  <div class="settings-destructive-info">
+                    <h4>Purge Webhook Delivery Logs</h4>
+                    <p>Permanently flush delivery traces, payload bodies, and failure inspection logs older than 7 days.</p>
+                  </div>
+                  <button class="btn-cancel" style="border-color: rgba(220, 38, 38, 0.35); color: var(--color-failure);" onclick="confirmDestructiveAction('Purge Logs', 'Are you sure you want to permanently delete delivery history older than 7 days?')">
+                    Purge logs
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- SECTION 2: TEAM -->
+            <div id="settingsSecTeam" class="settings-subpanel">
+              <div class="settings-group">
+                <div class="settings-group-header" style="display:flex; align-items:flex-start; justify-content:space-between;">
+                  <div>
+                    <h2 class="settings-group-title">Team members</h2>
+                    <p class="settings-group-desc">Manage collaborators with access to triage failures and configure endpoints.</p>
+                  </div>
+                  <button class="btn-primary-action" onclick="showToast('Invite member modal: Enter email to send invite')">
+                    <i data-lucide="user-plus" class="icon-control"></i>
+                    <span>Invite member</span>
+                  </button>
+                </div>
+
+                <div class="table-responsive-container" style="border: 1px solid var(--border-color); border-radius: var(--radius-control);">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Member</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th style="text-align: right;">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="font-medium" style="display:flex; align-items:center; gap:10px;">
+                          <span class="user-avatar-badge" style="width:28px; height:28px; font-size:11px;">AD</span>
+                          <span>Alex Developer</span>
+                        </td>
+                        <td class="text-secondary">alex@acme.com</td>
+                        <td><span class="badge-status-code" style="background:var(--primary-blue-subtle); color:var(--primary-blue); border-color:rgba(10,102,245,0.2);">Owner</span></td>
+                        <td><span class="health-badge health-healthy"><i data-lucide="circle-check" class="icon-control"></i> Active</span></td>
+                        <td style="text-align: right;"><button class="btn-table-action secondary" onclick="showToast('Primary workspace owner cannot be edited')">Manage</button></td>
+                      </tr>
+                      <tr>
+                        <td class="font-medium" style="display:flex; align-items:center; gap:10px;">
+                          <span class="user-avatar-badge" style="width:28px; height:28px; font-size:11px; background:#10B981;">SM</span>
+                          <span>Sarah Miller</span>
+                        </td>
+                        <td class="text-secondary">sarah.m@acme.com</td>
+                        <td><span class="badge-status-code">Admin</span></td>
+                        <td><span class="health-badge health-healthy"><i data-lucide="circle-check" class="icon-control"></i> Active</span></td>
+                        <td style="text-align: right;"><button class="btn-table-action secondary" onclick="showToast('Member permissions updated')">Edit</button></td>
+                      </tr>
+                      <tr>
+                        <td class="font-medium" style="display:flex; align-items:center; gap:10px;">
+                          <span class="user-avatar-badge" style="width:28px; height:28px; font-size:11px; background:#F59E0B;">DK</span>
+                          <span>Devon Kumar</span>
+                        </td>
+                        <td class="text-secondary">devon@acme.com</td>
+                        <td><span class="badge-status-code">Responder</span></td>
+                        <td><span class="health-badge health-healthy"><i data-lucide="circle-check" class="icon-control"></i> Active</span></td>
+                        <td style="text-align: right;"><button class="btn-table-action secondary" onclick="showToast('Member permissions updated')">Edit</button></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- SECTION 3: API KEYS (Supabase-inspired developer presentation) -->
+            <div id="settingsSecApikeys" class="settings-subpanel">
+              <div class="api-keys-wrapper">
+                
+                <!-- Page & Action Header -->
+                <div class="settings-group-header" style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom: 4px;">
+                  <div>
+                    <h2 class="settings-group-title">API keys</h2>
+                    <p class="settings-group-desc">Manage credentials used by your applications to authenticate with RelayGuard.</p>
+                  </div>
+                  <button class="btn-primary-action" onclick="openCreateApiKeyModal()" aria-label="Create API key">
+                    <i data-lucide="plus" class="icon-control"></i>
+                    <span>Create API key</span>
+                  </button>
+                </div>
+
+                <!-- Security Advisory Banner -->
+                <div class="api-security-notice">
+                  <i data-lucide="shield-alert" class="icon-control"></i>
+                  <div>
+                    <strong>Security note:</strong> Secret API keys grant administrative ingest privileges. Never expose secret keys in client-side applications, browsers, or public source repositories.
+                  </div>
+                </div>
+
+                <!-- Section A: Server-Side Secret Keys -->
+                <div class="api-keys-section">
+                  <div class="api-section-header">
+                    <div>
+                      <div class="api-section-title">Server secret keys</div>
+                      <div class="api-section-desc">Used on your backend servers to publish webhooks and query telemetry.</div>
+                    </div>
+                  </div>
+
+                  <div class="api-key-table-card">
+                    <!-- Key Row 1: Production Ingest -->
+                    <div class="api-key-row-item">
+                      <div class="api-key-name-col">
+                        <span class="api-key-title">Production Backend Ingest</span>
+                        <span class="api-key-subtext">Created Oct 14, 2026 • Last used 2m ago</span>
+                      </div>
+                      <div>
+                        <span class="api-key-scope-badge">
+                          <i data-lucide="shield-check" class="icon-control" style="width:11px; height:11px;"></i>
+                          <span>Full Ingest</span>
+                        </span>
+                      </div>
+                      <div class="api-key-value-box">
+                        <span class="api-key-value-text">rg_live_••••••••••••••••••••••••</span>
+                      </div>
+                      <div>
+                        <span class="health-badge health-healthy" style="padding: 2px 8px; font-size: 11.5px;">
+                          <i data-lucide="circle-check" class="icon-control"></i> Active
+                        </span>
+                      </div>
+                      <div class="api-key-actions">
+                        <button class="icon-copy-btn" onclick="copyToClipboard('rg_live_948f29c488b19e248b9f1a', this)" title="Copy masked key reference" aria-label="Copy key reference">
+                          <i data-lucide="copy" class="icon-control"></i>
+                        </button>
+                        <div class="relative-anchor">
+                          <button class="icon-more-btn" onclick="toggleApiKeyMenu(event, 'apiKeyMenu1')" title="More actions" aria-label="More actions for Production Backend Ingest">
+                            <i data-lucide="ellipsis" class="icon-control"></i>
+                          </button>
+                          <div id="apiKeyMenu1" class="dropdown-popover-menu endpoint-actions-menu">
+                            <button class="dropdown-popover-item" onclick="rotateApiKey('Production Backend Ingest')">
+                              <i data-lucide="refresh-cw" class="icon-control"></i>
+                              <span>Rotate key</span>
+                            </button>
+                            <button class="dropdown-popover-item" onclick="viewApiKeyMeta('Production Backend Ingest', 'rg_live_948f29c488b19e248b9f1a', 'Full Ingest', 'Oct 14, 2026')">
+                              <i data-lucide="info" class="icon-control"></i>
+                              <span>View metadata</span>
+                            </button>
+                            <div class="dropdown-divider"></div>
+                            <button class="dropdown-popover-item" onclick="revokeApiKey('Production Backend Ingest')">
+                              <span style="color:var(--color-failure);">Revoke key</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Key Row 2: Staging Ingest -->
+                    <div class="api-key-row-item">
+                      <div class="api-key-name-col">
+                        <span class="api-key-title">Staging Ingestion Worker</span>
+                        <span class="api-key-subtext">Created Oct 02, 2026 • Last used 14h ago</span>
+                      </div>
+                      <div>
+                        <span class="api-key-scope-badge">
+                          <i data-lucide="shield-check" class="icon-control" style="width:11px; height:11px;"></i>
+                          <span>Full Ingest</span>
+                        </span>
+                      </div>
+                      <div class="api-key-value-box">
+                        <span class="api-key-value-text">rg_stage_••••••••••••••••••••••••</span>
+                      </div>
+                      <div>
+                        <span class="health-badge health-healthy" style="padding: 2px 8px; font-size: 11.5px;">
+                          <i data-lucide="circle-check" class="icon-control"></i> Active
+                        </span>
+                      </div>
+                      <div class="api-key-actions">
+                        <button class="icon-copy-btn" onclick="copyToClipboard('rg_stage_412d8a98ef11b34e2c', this)" title="Copy masked key reference" aria-label="Copy key reference">
+                          <i data-lucide="copy" class="icon-control"></i>
+                        </button>
+                        <div class="relative-anchor">
+                          <button class="icon-more-btn" onclick="toggleApiKeyMenu(event, 'apiKeyMenu2')" title="More actions" aria-label="More actions for Staging Ingestion Worker">
+                            <i data-lucide="ellipsis" class="icon-control"></i>
+                          </button>
+                          <div id="apiKeyMenu2" class="dropdown-popover-menu endpoint-actions-menu">
+                            <button class="dropdown-popover-item" onclick="rotateApiKey('Staging Ingestion Worker')">
+                              <i data-lucide="refresh-cw" class="icon-control"></i>
+                              <span>Rotate key</span>
+                            </button>
+                            <button class="dropdown-popover-item" onclick="viewApiKeyMeta('Staging Ingestion Worker', 'rg_stage_412d8a98ef11b34e2c', 'Full Ingest', 'Oct 02, 2026')">
+                              <i data-lucide="info" class="icon-control"></i>
+                              <span>View metadata</span>
+                            </button>
+                            <div class="dropdown-divider"></div>
+                            <button class="dropdown-popover-item" onclick="revokeApiKey('Staging Ingestion Worker')">
+                              <span style="color:var(--color-failure);">Revoke key</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Section B: Read-Only Observability Tokens -->
+                <div class="api-keys-section" style="margin-top: 6px;">
+                  <div class="api-section-header">
+                    <div>
+                      <div class="api-section-title">Read-only tokens</div>
+                      <div class="api-section-desc">Restricted tokens limited to polling delivery status and health telemetry.</div>
+                    </div>
+                  </div>
+
+                  <div class="api-key-table-card">
+                    <div class="api-key-row-item">
+                      <div class="api-key-name-col">
+                        <span class="api-key-title">Datadog Observability Sync</span>
+                        <span class="api-key-subtext">Created Sep 22, 2026 • Last used 1h ago</span>
+                      </div>
+                      <div>
+                        <span class="api-key-scope-badge read-only">
+                          <i data-lucide="eye" class="icon-control" style="width:11px; height:11px;"></i>
+                          <span>Read-Only</span>
+                        </span>
+                      </div>
+                      <div class="api-key-value-box">
+                        <span class="api-key-value-text">rg_ro_••••••••••••••••••••••••</span>
+                      </div>
+                      <div>
+                        <span class="health-badge health-healthy" style="padding: 2px 8px; font-size: 11.5px;">
+                          <i data-lucide="circle-check" class="icon-control"></i> Active
+                        </span>
+                      </div>
+                      <div class="api-key-actions">
+                        <button class="icon-copy-btn" onclick="copyToClipboard('rg_ro_33bc21e789802ac90184e', this)" title="Copy token reference" aria-label="Copy token reference">
+                          <i data-lucide="copy" class="icon-control"></i>
+                        </button>
+                        <div class="relative-anchor">
+                          <button class="icon-more-btn" onclick="toggleApiKeyMenu(event, 'apiKeyMenu3')" title="More actions" aria-label="More actions for Datadog Observability Sync">
+                            <i data-lucide="ellipsis" class="icon-control"></i>
+                          </button>
+                          <div id="apiKeyMenu3" class="dropdown-popover-menu endpoint-actions-menu">
+                            <button class="dropdown-popover-item" onclick="viewApiKeyMeta('Datadog Observability Sync', 'rg_ro_33bc21e789802ac90184e', 'Read-Only Telemetry', 'Sep 22, 2026')">
+                              <i data-lucide="info" class="icon-control"></i>
+                              <span>View metadata</span>
+                            </button>
+                            <div class="dropdown-divider"></div>
+                            <button class="dropdown-popover-item" onclick="revokeApiKey('Datadog Observability Sync')">
+                              <span style="color:var(--color-failure);">Revoke token</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Section C: Integration Code Snippet (RelayGuard Actual Contract) -->
+                <div class="integration-snippet-card">
+                  <div class="integration-snippet-header">
+                    <span class="integration-snippet-title">Authentication example (cURL)</span>
+                    <button class="btn-table-action secondary" onclick="copyToClipboard('curl -X POST https://api.relayguard.dev/v1/deliveries \\\n  -H &quot;Authorization: Bearer rg_live_948f29c488b19e248b9f1a&quot; \\\n  -H &quot;Content-Type: application/json&quot; \\\n  -d \'{\&quot;event\&quot;: \&quot;invoice.paid\&quot;, \&quot;endpoint_id\&quot;: \&quot;ep_live_01\&quot;}\'', this)">
+                      <i data-lucide="copy" class="icon-control"></i>
+                      <span>Copy snippet</span>
+                    </button>
+                  </div>
+                  <pre class="integration-code-block font-mono"><code>curl -X POST https://api.relayguard.dev/v1/deliveries \
+  -H "Authorization: Bearer rg_live_948f29c488b19e248b9f1a" \
+  -H "Content-Type: application/json" \
+  -d '{"event": "invoice.paid", "endpoint_id": "ep_live_01"}'</code></pre>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- SECTION 4: NOTIFICATIONS -->
+            <div id="settingsSecNotifications" class="settings-subpanel">
+              <div class="settings-group">
+                <div class="settings-group-header">
+                  <h2 class="settings-group-title">Notification channels</h2>
+                  <p class="settings-group-desc">Configure where alerts and failure reports are broadcast when delivery thresholds breach.</p>
+                </div>
+
+                <div class="settings-toggle-row">
+                  <div class="settings-toggle-info">
+                    <h4>Slack Incident Channel</h4>
+                    <p>Post interactive alerts to <code>#webhook-alerts</code> with direct 1-click retry actions.</p>
+                  </div>
+                  <label class="switch-toggle-input">
+                    <input type="checkbox" checked onchange="showToast('Slack notification channel updated')">
+                    <span class="switch-slider"></span>
+                  </label>
+                </div>
+
+                <div class="settings-toggle-row">
+                  <div class="settings-toggle-info">
+                    <h4>PagerDuty Critical Escalation</h4>
+                    <p>Trigger high-urgency incidents when consecutive failure threshold breaches 5%.</p>
+                  </div>
+                  <label class="switch-toggle-input">
+                    <input type="checkbox" checked onchange="showToast('PagerDuty integration updated')">
+                    <span class="switch-slider"></span>
+                  </label>
+                </div>
+
+                <div class="settings-toggle-row">
+                  <div class="settings-toggle-info">
+                    <h4>Email Incident Digest</h4>
+                    <p>Daily report summarizing delivery health, recovery MTTR, and failure clusters.</p>
+                  </div>
+                  <label class="switch-toggle-input">
+                    <input type="checkbox" onchange="showToast('Daily email digest updated')">
+                    <span class="switch-slider"></span>
+                  </label>
+                </div>
+
+                <div class="settings-toggle-row">
+                  <div class="settings-toggle-info">
+                    <h4>In-App Sound Alerts</h4>
+                    <p>Play subtle audio cues in the dashboard when live events experience sudden surge errors.</p>
+                  </div>
+                  <label class="switch-toggle-input">
+                    <input type="checkbox" checked onchange="showToast('Audio notification cues updated')">
+                    <span class="switch-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <hr class="settings-divider" />
+
+              <div class="settings-group">
+                <div class="settings-group-header">
+                  <h2 class="settings-group-title">Event triggers</h2>
+                  <p class="settings-group-desc">Choose which lifecycle events notify team responders.</p>
+                </div>
+
+                <div class="settings-toggle-row">
+                  <div class="settings-toggle-info">
+                    <h4>High failure rate spikes</h4>
+                    <p>Trigger notification when failure rate exceeds 10% over any 5-minute evaluation period.</p>
+                  </div>
+                  <label class="switch-toggle-input">
+                    <input type="checkbox" checked onchange="showToast('High failure trigger updated')">
+                    <span class="switch-slider"></span>
+                  </label>
+                </div>
+
+                <div class="settings-toggle-row">
+                  <div class="settings-toggle-info">
+                    <h4>Endpoint unavailable (Circuit break)</h4>
+                    <p>Notify team when an endpoint produces 5 consecutive timeouts or 5xx server errors.</p>
+                  </div>
+                  <label class="switch-toggle-input">
+                    <input type="checkbox" checked onchange="showToast('Circuit break trigger updated')">
+                    <span class="switch-slider"></span>
+                  </label>
+                </div>
+
+                <div class="settings-toggle-row">
+                  <div class="settings-toggle-info">
+                    <h4>Retries exhausted (Dead-letter)</h4>
+                    <p>Notify team when all configured backoff attempts fail and payload moves to dead-letter storage.</p>
+                  </div>
+                  <label class="switch-toggle-input">
+                    <input type="checkbox" checked onchange="showToast('Dead-letter trigger updated')">
+                    <span class="switch-slider"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- SECTION 5: DELIVERY & RETRY SETTINGS -->
+            <div id="settingsSecDelivery" class="settings-subpanel">
+              <div class="settings-group">
+                <div class="settings-group-header">
+                  <h2 class="settings-group-title">Delivery & retry policy</h2>
+                  <p class="settings-group-desc">Define automatic recovery algorithms and backoff timing for non-2xx responses.</p>
+                </div>
+
+                <div class="settings-field-grid">
+                  <div class="settings-field-row">
+                    <label class="settings-label" for="settingsRetryPolicy">Default retry strategy</label>
+                    <select class="input-glass" id="settingsRetryPolicy">
+                      <option selected>Exponential backoff (recommended, base 2s)</option>
+                      <option>Linear backoff (fixed interval)</option>
+                      <option>Immediate aggressive burst (3 fast attempts)</option>
+                      <option>Custom schedule</option>
+                    </select>
+                    <span class="settings-help">Formula: <code>delay = base_interval * (2 ^ attempt)</code> with full jitter.</span>
+                  </div>
+
+                  <div class="settings-field-row">
+                    <label class="settings-label" for="settingsMaxAttempts">Maximum retry attempts</label>
+                    <input type="number" class="input-glass" id="settingsMaxAttempts" value="5" min="1" max="20" />
+                    <span class="settings-help">Number of automated attempts before moving delivery to Dead-Letter queue.</span>
+                  </div>
+                </div>
+
+                <div class="settings-field-grid">
+                  <div class="settings-field-row">
+                    <label class="settings-label" for="settingsTimeout">Request timeout</label>
+                    <select class="input-glass" id="settingsTimeout">
+                      <option>5 seconds</option>
+                      <option selected>10 seconds (standard)</option>
+                      <option>30 seconds (long compute)</option>
+                      <option>60 seconds (enterprise max)</option>
+                    </select>
+                    <span class="settings-help">Time RelayGuard waits for initial HTTP headers before classifying as Timeout.</span>
+                  </div>
+
+                  <div class="settings-field-row">
+                    <label class="settings-label" for="settingsRetention">Failed-delivery retention period</label>
+                    <select class="input-glass" id="settingsRetention">
+                      <option>14 days (Starter)</option>
+                      <option selected>30 days (Growth)</option>
+                      <option>90 days (Business)</option>
+                      <option>365 days (Enterprise)</option>
+                    </select>
+                    <span class="settings-help">Duration payloads and execution traces are preserved for manual replay.</span>
+                  </div>
+                </div>
+
+                <div class="settings-action-bar">
+                  <button class="btn-cancel" onclick="showToast('Changes discarded')">Reset</button>
+                  <button class="btn-primary-action" onclick="showToast('Delivery and retry preferences saved!')">
+                    <span>Save policy</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- SECTION 6: SECURITY -->
+            <div id="settingsSecSecurity" class="settings-subpanel">
+              <div class="settings-group">
+                <div class="settings-group-header">
+                  <h2 class="settings-group-title">Security & data governance</h2>
+                  <p class="settings-group-desc">Enforce network isolation, payload redaction, and cryptographic signature validation.</p>
+                </div>
+
+                <div class="settings-toggle-row">
+                  <div class="settings-toggle-info">
+                    <h4>SSRF & Private IP Protection</h4>
+                    <p>Block webhook deliveries destined for RFC 1918 private ranges, loopback addresses (127.0.0.1), and cloud metadata services (169.254.169.254).</p>
+                  </div>
+                  <span class="health-badge health-healthy" style="flex-shrink:0;">
+                    <i data-lucide="shield-check" class="icon-control"></i>
+                    <span>Enforced</span>
+                  </span>
+                </div>
+
+                <div class="settings-toggle-row">
+                  <div class="settings-toggle-info">
+                    <h4>HMAC SHA-256 Webhook Signatures</h4>
+                    <p>Include <code>X-RelayGuard-Signature</code> header on all outgoing deliveries using your project secret.</p>
+                  </div>
+                  <label class="switch-toggle-input">
+                    <input type="checkbox" checked onchange="showToast('Signature validation setting updated')">
+                    <span class="switch-slider"></span>
+                  </label>
+                </div>
+
+                <div class="settings-toggle-row">
+                  <div class="settings-toggle-info">
+                    <h4>Sensitive Header Redaction</h4>
+                    <p>Automatically strip <code>Authorization</code>, <code>Cookie</code>, and <code>X-Api-Key</code> headers from persistent inspection logs.</p>
+                  </div>
+                  <label class="switch-toggle-input">
+                    <input type="checkbox" checked onchange="showToast('Header redaction updated')">
+                    <span class="switch-slider"></span>
+                  </label>
+                </div>
+
+                <div class="settings-toggle-row">
+                  <div class="settings-toggle-info">
+                    <h4>Strict TLS / SSL Verification</h4>
+                    <p>Reject webhook deliveries if the target destination presents an invalid, expired, or self-signed certificate.</p>
+                  </div>
+                  <label class="switch-toggle-input">
+                    <input type="checkbox" checked onchange="showToast('TLS verification updated')">
+                    <span class="switch-slider"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- SECTION 7: BILLING -->
+            <div id="settingsSecBilling" class="settings-subpanel">
+              <div class="settings-group">
+                <div class="settings-group-header" style="display:flex; align-items:flex-start; justify-content:space-between;">
+                  <div>
+                    <h2 class="settings-group-title">Subscription & Usage</h2>
+                    <p class="settings-group-desc">Review your throughput quota, retention tiers, and current billing cycle.</p>
+                  </div>
+                  <span class="status-tag status-success" style="font-size:12px; font-weight:600;">Growth Tier</span>
+                </div>
+
+                <div style="margin-bottom: 24px;">
+                  <div style="display:flex; justify-content:space-between; font-size:13.5px; font-weight:500; margin-bottom:8px;">
+                    <span>Monthly Ingestion Usage</span>
+                    <span class="font-medium text-main">1,284,920 / 2,000,000 (64.2%)</span>
+                  </div>
+                  <div style="height:8px; background:#E2E8F0; border-radius:999px; overflow:hidden;">
+                    <div style="width:64.2%; height:100%; background:linear-gradient(90deg, #0A66F5, #38BDF8); border-radius:999px;"></div>
+                  </div>
+                  <span class="settings-help" style="display:block; margin-top:6px;">Current cycle resets in 14 days on November 11, 2026.</span>
+                </div>
+
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:16px; background:#FFFFFF; border:1px solid var(--border-color); border-radius:var(--radius-control); margin-bottom:24px;">
+                  <div style="display:flex; align-items:center; gap:14px;">
+                    <i data-lucide="credit-card" class="icon-control" style="color:var(--text-secondary); width:24px; height:24px;"></i>
+                    <div>
+                      <div style="font-weight:600; font-size:13.5px; color:var(--text-main);">Mastercard ending in 4921</div>
+                      <div style="font-size:12px; color:var(--text-secondary);">Expires 08/28 • Default payment method</div>
+                    </div>
+                  </div>
+                  <button class="btn-table-action secondary" onclick="showToast('Payment method update opened')">Update card</button>
+                </div>
+
+                <div class="settings-action-bar">
+                  <button class="btn-cancel" onclick="showToast('Downloading latest invoice PDF...')">Download invoice</button>
+                  <button class="btn-primary-action" onclick="showToast('Enterprise plan upgrade consultation opened')">Upgrade plan</button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- 4F. CONTEXTUAL FAILURE DETAIL DRAWER (380-420px) -->
+    <aside class="detail-drawer closed" id="inspectionDrawer">
+      <div class="drawer-header-row">
+        <div class="drawer-top-line">
+          <span class="drawer-title-event" id="drawerEventId">evt_8f31a2c9</span>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="status-tag failed" id="drawerStatusBadge">Failed</span>
+
+            <!-- (9) More Actions Dropdown (Three Dots / EllipsisVertical) -->
+            <div class="relative-anchor">
+              <button class="icon-more-btn" id="drawerMoreBtn" onclick="toggleDrawerMoreDropdown(event)" aria-label="More actions" title="More actions">
+                <i data-lucide="ellipsis-vertical" class="icon-control"></i>
+              </button>
+
+              <div id="drawerMoreDropdown" class="dropdown-popover-menu more-actions-dropdown">
+                <button class="dropdown-popover-item" onclick="actionViewInNewTab()">
+                  <i data-lucide="external-link" class="icon-control"></i>
+                  <span>View in new tab</span>
+                </button>
+                <button class="dropdown-popover-item" onclick="actionCopyEventId()">
+                  <i data-lucide="copy" class="icon-control"></i>
+                  <span>Copy event ID</span>
+                </button>
+                <button class="dropdown-popover-item" onclick="actionCopyEndpointUrl()">
+                  <i data-lucide="copy" class="icon-control"></i>
+                  <span>Copy endpoint URL</span>
+                </button>
+                <button class="dropdown-popover-item" onclick="actionViewRawPayload()">
+                  <i data-lucide="braces" class="icon-control"></i>
+                  <span>View raw payload</span>
+                </button>
+                <div class="dropdown-divider"></div>
+                <button class="dropdown-popover-item text-danger" onclick="actionCancelPendingRetries()">
+                  <i data-lucide="ban" class="icon-control"></i>
+                  <span>Cancel pending retries</span>
+                </button>
+              </div>
+            </div>
+
+            <button class="drawer-close-action" onclick="closeDrawer()" aria-label="Close details drawer" title="Close details">
+              <i data-lucide="x" class="icon-control"></i>
+            </button>
+          </div>
+        </div>
+        <div class="drawer-meta-caption" id="drawerSubmeta">user.created · Oct 21, 2026 10:24:32</div>
+      </div>
+
+      <!-- Drawer Section Navigation Tabs -->
+      <div class="drawer-tab-bar">
+        <button class="tab-btn active" data-tab="overview">
+          <i data-lucide="layout-grid" class="icon-control"></i>
+          <span>Overview</span>
+        </button>
+        <button class="tab-btn" data-tab="attempts">
+          <i data-lucide="history" class="icon-control"></i>
+          <span>Attempts</span>
+        </button>
+        <button class="tab-btn" data-tab="request">
+          <i data-lucide="arrow-up-right" class="icon-control"></i>
+          <span>Request</span>
+        </button>
+        <button class="tab-btn" data-tab="response">
+          <i data-lucide="arrow-down-left" class="icon-control"></i>
+          <span>Response</span>
+        </button>
+      </div>
+
+      <!-- Tab Content Area -->
+      <div id="drawerTabContent">
+        <!-- Injected via app.js with (7) Retry Delivery button and (8) Replay as new event button -->
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODALS (1, 7, 8) as Specified in the Design Breakdown   -->
+  <!-- ======================================================== -->
+
+  <!-- (1) Add Webhook Endpoint Modal -->
+  <div id="addEndpointModal" class="modal-overlay" onclick="handleModalOverlayClick(event, 'addEndpointModal')">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title">Add webhook endpoint</h2>
+        <button class="modal-close-btn" onclick="closeModal('addEndpointModal')" aria-label="Close modal">
+          <i data-lucide="x" class="icon-control"></i>
+        </button>
+      </div>
+      <form id="addEndpointForm" onsubmit="submitAddEndpoint(event)">
+        <div class="form-field-group">
+          <label class="form-label" for="endpointNameInput">Endpoint name</label>
+          <input type="text" id="endpointNameInput" class="form-input" placeholder="e.g. User service" required />
+        </div>
+
+        <div class="form-field-group">
+          <label class="form-label" for="endpointUrlInput">Endpoint URL</label>
+          <input type="url" id="endpointUrlInput" class="form-input" placeholder="https://api.example.com/webhooks" required />
+        </div>
+
+        <div class="form-field-group">
+          <label class="form-label" for="endpointAuthInput">Authentication (optional)</label>
+          <select id="endpointAuthInput" class="form-select">
+            <option value="none">None</option>
+            <option value="hmac">HMAC Signature (SHA-256)</option>
+            <option value="bearer">Bearer Token</option>
+            <option value="basic">Basic Auth</option>
+          </select>
+        </div>
+
+        <div class="form-field-group">
+          <label class="form-label" for="endpointDescInput">Description (optional)</label>
+          <textarea id="endpointDescInput" class="form-textarea" placeholder="Add a note..."></textarea>
+        </div>
+
+        <div class="modal-actions-footer">
+          <button type="button" class="btn-cancel" onclick="closeModal('addEndpointModal')">Cancel</button>
+          <button type="submit" class="btn-primary-action">
+            <i data-lucide="check" class="icon-control"></i>
+            <span>Save endpoint</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- (7) Retry This Delivery Confirmation Modal -->
+  <div id="retryConfirmModal" class="modal-overlay" onclick="handleModalOverlayClick(event, 'retryConfirmModal')">
+    <div class="modal-card modal-card-sm text-center">
+      <button class="modal-close-btn modal-close-topright" onclick="closeModal('retryConfirmModal')" aria-label="Close modal">
+        <i data-lucide="x" class="icon-control"></i>
+      </button>
+      
+      <div class="modal-icon-bubble bubble-blue">
+        <i data-lucide="rotate-ccw" class="icon-standard"></i>
+      </div>
+
+      <h3 class="modal-title-center">Retry this delivery?</h3>
+      <p class="modal-body-p">
+        This will send the event to the configured endpoint again. Make sure the receiving endpoint can process it safely.
+      </p>
+
+      <div class="modal-actions-row">
+        <button type="button" class="btn-cancel" onclick="closeModal('retryConfirmModal')">Cancel</button>
+        <button type="button" class="btn-primary-action" onclick="confirmExecuteRetry()">
+          <i data-lucide="rotate-ccw" class="icon-control"></i>
+          <span>Retry delivery</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- (8) Replay as New Event Warning Modal -->
+  <div id="replayConfirmModal" class="modal-overlay" onclick="handleModalOverlayClick(event, 'replayConfirmModal')">
+    <div class="modal-card modal-card-sm text-center">
+      <button class="modal-close-btn modal-close-topright" onclick="closeModal('replayConfirmModal')" aria-label="Close modal">
+        <i data-lucide="x" class="icon-control"></i>
+      </button>
+      
+      <div class="modal-icon-bubble bubble-amber">
+        <i data-lucide="triangle-alert" class="icon-standard"></i>
+      </div>
+
+      <h3 class="modal-title-center">Replay as new event?</h3>
+      <p class="modal-body-p">
+        This will create a new delivery with the same payload. The receiving system may process it again. Ensure idempotency.
+      </p>
+
+      <div class="modal-actions-row">
+        <button type="button" class="btn-cancel" onclick="closeModal('replayConfirmModal')">Cancel</button>
+        <button type="button" class="btn-primary-action" onclick="confirmExecuteReplay()">
+          <i data-lucide="play" class="icon-control"></i>
+          <span>Replay event</span>
+        </button>
+      </div>
+    </div>
+  <!-- (9) Create API Key Modal (Supabase-style One-Time Reveal) -->
+  <div id="createApiKeyModal" class="modal-overlay" onclick="handleModalOverlayClick(event, 'createApiKeyModal')">
+    <div class="modal-card" style="max-width: 480px;">
+      <button class="modal-close-btn modal-close-topright" onclick="closeModal('createApiKeyModal')" aria-label="Close modal">
+        <i data-lucide="x" class="icon-control"></i>
+      </button>
+
+      <!-- Form View -->
+      <div id="createKeyFormView">
+        <div class="modal-header-clean" style="margin-bottom: 16px;">
+          <h3 class="modal-title-left" style="font-size: 18px; font-weight: 600;">Create new API key</h3>
+          <p class="modal-subtitle-left" style="font-size: 13px; color: var(--text-secondary);">
+            Generate a secret token for your services to authenticate webhook events.
+          </p>
+        </div>
+
+        <form id="createApiKeyForm" onsubmit="handleCreateApiKeySubmit(event)">
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label class="form-label" for="apiKeyNameInput">Key name</label>
+            <input type="text" id="apiKeyNameInput" class="input-glass" placeholder="e.g. Payments Service Production" required />
+            <span class="form-hint" style="font-size: 12px; color: var(--text-secondary); margin-top: 4px; display: block;">
+              A descriptive identifier for team audit logs.
+            </span>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label class="form-label" for="apiKeyScopeSelect">Key type & permissions</label>
+            <select id="apiKeyScopeSelect" class="input-glass">
+              <option value="ingest">Full Ingest (Publish webhooks & trigger retries)</option>
+              <option value="readonly">Read-Only Telemetry (Inspect delivery stats)</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 20px;">
+            <label class="form-label" for="apiKeyExpirationSelect">Expiration</label>
+            <select id="apiKeyExpirationSelect" class="input-glass">
+              <option value="never">No expiration</option>
+              <option value="30d">30 days</option>
+              <option value="90d">90 days</option>
+              <option value="1y">1 year</option>
+            </select>
+          </div>
+
+          <div class="modal-actions-row">
+            <button type="button" class="btn-cancel" onclick="closeModal('createApiKeyModal')">Cancel</button>
+            <button type="submit" class="btn-primary-action">
+              <i data-lucide="key" class="icon-control"></i>
+              <span>Generate secret key</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Reveal Secret View (One-time Display) -->
+      <div id="createKeyRevealView" style="display: none;">
+        <div class="modal-header-clean" style="margin-bottom: 14px;">
+          <h3 class="modal-title-left" style="font-size: 18px; font-weight: 600; color: var(--text-main);">Save your API key</h3>
+          <p class="modal-subtitle-left" style="font-size: 13px; color: var(--text-secondary);">
+            Please copy this key now. RelayGuard hashes credentials at rest and cannot display it again.
+          </p>
+        </div>
+
+        <div class="modal-reveal-warning">
+          <i data-lucide="triangle-alert" class="icon-control" style="flex-shrink: 0; margin-top: 2px;"></i>
+          <span>This secret will only be shown once. If you lose it, you will need to generate a new key and update your services.</span>
+        </div>
+
+        <div class="revealed-key-box">
+          <span class="revealed-key-text" id="revealedSecretValue">rg_live_948f29c488b19e248b9f1a</span>
+          <button type="button" class="btn-primary-action" style="height: 32px; padding: 0 12px; font-size: 12.5px;" onclick="copyRevealedSecret(this)">
+            <i data-lucide="copy" class="icon-control"></i>
+            <span>Copy</span>
+          </button>
+        </div>
+
+        <div class="modal-actions-row">
+          <button type="button" class="btn-primary-action" style="width: 100%; justify-content: center;" onclick="closeModal('createApiKeyModal')">
+            <span>I have safely saved this key</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- (10) API Key Metadata Modal -->
+  <div id="apiKeyMetaModal" class="modal-overlay" onclick="handleModalOverlayClick(event, 'apiKeyMetaModal')">
+    <div class="modal-card" style="max-width: 440px;">
+      <button class="modal-close-btn modal-close-topright" onclick="closeModal('apiKeyMetaModal')" aria-label="Close modal">
+        <i data-lucide="x" class="icon-control"></i>
+      </button>
+
+      <div class="modal-header-clean" style="margin-bottom: 14px;">
+        <h3 class="modal-title-left" style="font-size: 18px; font-weight: 600;">Key Metadata</h3>
+        <p class="modal-subtitle-left" style="font-size: 13px; color: var(--text-secondary);">
+          Cryptographic provenance and usage attributes.
+        </p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px; font-size: 13px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; padding-bottom: 8px; border-bottom: 1px solid var(--border-subtle);">
+          <span class="text-secondary">Key Name</span>
+          <strong id="metaKeyName" style="color: var(--text-main);">-</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding-bottom: 8px; border-bottom: 1px solid var(--border-subtle);">
+          <span class="text-secondary">Identifier Reference</span>
+          <code id="metaKeyRef" class="font-mono" style="color: var(--primary-blue);">-</code>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding-bottom: 8px; border-bottom: 1px solid var(--border-subtle);">
+          <span class="text-secondary">Permissions</span>
+          <span id="metaKeyScope" class="badge-status-code">-</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding-bottom: 8px; border-bottom: 1px solid var(--border-subtle);">
+          <span class="text-secondary">Created Date</span>
+          <span id="metaKeyCreated" class="num-tabular">-</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span class="text-secondary">Storage Model</span>
+          <span>SHA-256 Hashed (Non-retrievable)</span>
+        </div>
+      </div>
+
+      <div class="modal-actions-row">
+        <button type="button" class="btn-primary-action" style="width: 100%; justify-content: center;" onclick="closeModal('apiKeyMetaModal')">
+          <span>Close</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
